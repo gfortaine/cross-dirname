@@ -1,10 +1,10 @@
 # cross-dirname
 
-Node.js / Gjs / Deno module that returns the current script dirname. Similar to `__dirname` but also works in CommonJs and ES modules.  
+[Node.js](https://nodejs.org) + [Gjs](https://gjs.guide/) + [Deno](https://deno.land/) module that returns the current script dirname. Similar to `__dirname` but also works in CommonJs and ES modules.  
 
 ## Installation
 
-On Node.js you can install the package as usual with NPM:
+On Node.js and GJS you can install the package as with NPM:
 
 ```
 npm install cross-dirname --save
@@ -13,23 +13,53 @@ npm install cross-dirname --save
 On Deno you just need to import this package:
 
 ```ts
-import dirname from "https://deno.land/x/cross_dirname/mod.ts";
+import dirname from 'https://deno.land/x/cross_dirname/mod.ts';
 ```
 
 ## Usage
 
-### /path/to/the/script.mjs
+### Node.js ESM
 
-```javascript
+```js
+// /path/to/the/script.mjs
 import dirname from 'cross-dirname'
 
 console.log(dirname()) // outputs "/path/to/the"
 ```
 
-### CommonJs
+### Node.js CJS
 
-```javascript
+```js
+// /path/to/the/script.cjs
 console.log(require('cross-dirname')() === __dirname) // true
+```
+
+### Deno
+
+```ts
+// /path/to/the/script.ts
+import { dirname } from 'https://deno.land/x/cross_dirname@v0.0.4/mod.ts';
+console.log(dirname()); // outputs "/path/to/the"
+```
+
+### GJS
+
+You can use NPM packages in GJS with a bundler like [esbuild](https://esbuild.github.io/).
+
+Take a look at the examples for an [GJS + esbuild example](/examples/gjs), you can start the example like this: 
+
+```bash
+# Install dev dependencies 
+npm install
+
+# Go to the example
+cd examples/gjs
+
+# Bundle src/index.js
+node esbuild.mjs
+
+# Run the bundled index.js
+gjs -m index.js
 ```
 
 ### Contributions
