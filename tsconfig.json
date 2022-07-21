@@ -12,5 +12,5 @@
         "forceConsistentCasingInFileNames": true,
         "moduleResolution": "node"
     },
-    "exclude": ["mod.ts"]
+    "include": ["src"]
   }
