@@ -110,8 +110,8 @@ This module has been tested on the following platforms:
 | Gjs     | NO-ESM | Linux    | TODO     |
 | Gjs     | NO-ESM | MacOS    | TODO     |
 | Gjs     | NO-ESM | Windows  | TODO     |
-| Chrome  | ESM    | -        | NO ERROR |
-| Browser | CJS    | -        | NO ERROR |
+| Chrome  | ESM    | Browser  | NO ERROR |
+| Chrome  | CJS    | Browser  | NO ERROR |
 
 You can run all tests with:
 
