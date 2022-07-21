@@ -1,5 +1,5 @@
 {
-  "name": "es-dirname",
+  "name": "cross-dirname",
   "version": "0.0.2",
   "type": "commonjs",
   "main": "./dist/cjs/index.cjs",

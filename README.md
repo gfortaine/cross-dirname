@@ -1,19 +1,19 @@
-# es-dirname
+# cross-dirname
 
 Node.js / Gjs / Deno module that returns the current script dirname. Similar to `__dirname` but also works in CommonJs and ES modules.  
 
-Contributions for more platforms are welcome.
-
 ## Installation
 
-```yarn add es-dirname```
+```
+npm install cross-dirname --save
+```
 
 ## Usage
 
 ### /path/to/the/script.mjs
 
 ```javascript
-import dirname from 'es-dirname'
+import dirname from 'cross-dirname'
 
 console.log(dirname()) // outputs "/path/to/the"
 ```
@@ -21,7 +21,7 @@ console.log(dirname()) // outputs "/path/to/the"
 ### CommonJs
 
 ```javascript
-console.log(require('es-dirname')() === __dirname) // true
+console.log(require('cross-dirname')() === __dirname) // true
 ```
 
 ### Contributions
