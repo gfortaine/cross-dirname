@@ -23,32 +23,33 @@ const getPathFromErrorStack = () => {
 
   let path: string | undefined;
 
-  try {
-    throw new Error();
-  } catch (e: any) {
+  const stack = new Error().stack;
 
-    // Node.js
-    let initiator: string | undefined = e.stack.split('\n').slice(3, 4)[0]
+  if(!stack) {
+    throw new Error("Error has no stack!");
+  }
+
+  // Node.js
+  let initiator: string | undefined = stack.split('\n').slice(3, 4)[0]
+
+  // GJS
+  if(!initiator) {
+    initiator = stack.split('\n').slice(2, 3)[0]
+  }
+
+  if (initiator) {
 
     // GJS
-    if(!initiator) {
-      initiator = e.stack.split('\n').slice(2, 3)[0]
+    path = GJS_EXTRACT_PATH_REGEX.exec(initiator)?.groups?.path
+
+    // Node.js
+    if(!path) {
+      path = NODE_EXTRACT_PATH_REGEX.exec(initiator)?.groups?.path
     }
+  }
 
-    if (initiator) {
-
-      // GJS
-      path = GJS_EXTRACT_PATH_REGEX.exec(initiator)?.groups?.path
-
-      // Node.js
-      if(!path) {
-        path = NODE_EXTRACT_PATH_REGEX.exec(initiator)?.groups?.path
-      }
-    }
-
-    if(!initiator) {
-      throw new Error("Can't get __dirname!");
-    }
+  if(!initiator) {
+    throw new Error("Can't get __dirname!");
   }
 
   if(!path) {
