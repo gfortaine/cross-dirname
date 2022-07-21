@@ -1,10 +1,11 @@
 #! /usr/bin/env node
 import { build } from "esbuild";
-import dirname from "../../dist/esm/index.mjs";
+import dirname from "cross-dirname";
+const __dirname = dirname();
 
 await build({
-    entryPoints: ['./src/index.js'],
-    outdir: dirname(),
+    entryPoints: [__dirname + '/src/index.js'],
+    outdir: __dirname,
     bundle: true,
     // target: "firefox60", // Since GJS 1.53.90
     // target: "firefox68", // Since GJS 1.63.90

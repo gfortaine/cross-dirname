@@ -38,7 +38,7 @@ console.log(require('cross-dirname')() === __dirname) // true
 
 ```ts
 // /path/to/the/script.ts
-import { dirname } from 'https://deno.land/x/cross_dirname@v0.0.4/mod.ts';
+import dirname from 'https://deno.land/x/cross_dirname@v0.0.4/mod.ts';
 console.log(dirname()); // outputs "/path/to/the"
 ```
 
@@ -60,6 +60,29 @@ node esbuild.mjs
 
 # Run the bundled index.js
 gjs -m index.js
+```
+
+### Examples
+
+You can run the examples with
+
+```bash
+
+npm install
+npm run build
+
+deno run ./examples/deno/index.ts 
+# -> /.../examples/deno
+
+node ./examples/node/index.cjs 
+# -> /.../examples/node
+
+node ./examples/node/index.mjs 
+# -> /.../examples/node
+
+node ./examples/gjs/esbuild.mjs
+gjs -m ./examples/gjs/index.js 
+# -> /.../examples/gjs
 ```
 
 ### Contributions
