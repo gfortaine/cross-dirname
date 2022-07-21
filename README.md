@@ -4,8 +4,16 @@ Node.js / Gjs / Deno module that returns the current script dirname. Similar to 
 
 ## Installation
 
+On Node.js you can install the package as usual with NPM:
+
 ```
 npm install cross-dirname --save
+```
+
+On Deno you just need to import this package:
+
+```ts
+import dirname from "https://deno.land/x/cross_dirname/mod.ts";
 ```
 
 ## Usage

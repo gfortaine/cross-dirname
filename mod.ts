@@ -1,2 +1,4 @@
 // Export for deno
-export * from './src/index.ts';
+import dirname from './src/index.ts';
+export { dirname };
+export default dirname;
