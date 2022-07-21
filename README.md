@@ -110,6 +110,8 @@ This module has been tested on the following platforms:
 | Gjs     | NO-ESM | Linux    | TODO     |
 | Gjs     | NO-ESM | MacOS    | TODO     |
 | Gjs     | NO-ESM | Windows  | TODO     |
+| Chrome  | ESM    | -        | NO ERROR |
+| Browser | CJS    | -        | NO ERROR |
 
 You can run all tests with:
 
@@ -123,4 +125,5 @@ Or the tests for a special runtime:
 npm run test:node
 npm run test:deno
 npm run test:gjs
+npm run test:browser´
 ```
