@@ -1,6 +1,6 @@
 {
   "name": "cross-dirname",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "type": "commonjs",
   "main": "./dist/cjs/index.cjs",
   "module": "./dist/esm/index.mjs",
@@ -11,6 +11,9 @@
       "default": "./dist/esm/index.mjs"
     }
   },
+  "files": [
+    "/dist"
+  ],
   "scripts": {
     "clear": "rm -rf dist",
     "build": "npm run clear && npm run build:cjs && npm run build:esm && npm run build:types",
@@ -24,9 +27,19 @@
   },
   "keywords": [
     "dirname",
+    "cross-platform",
     "esm",
-    "cjs"
+    "cjs",
+    "node",
+    "deno",
+    "gjs"
   ],
+  "url": "https://github.com/JumpLink/cross-dirname",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JumpLink/cross-dirname.git"
+  },
   "devDependencies": {
     "chai": "^4.3.6",
     "esm": "^3.2.25",
