@@ -1,9 +1,9 @@
-import { dirname as pathDirname } from "https://deno.land/std/path/mod.ts";
+import { dirname as pathDirname, fromFileUrl } from "https://deno.land/std/path/mod.ts";
 import { assertEquals } from "https://deno.land/std/testing/asserts.ts";
 import { getDirname, getFilename } from '../../mod.ts';
 
 export const esmFilename = () => {
-    const __filename = new URL('', import.meta.url).pathname;
+    const __filename = path.fromFileUrl(import.meta.url);
     return __filename;
 };
 
