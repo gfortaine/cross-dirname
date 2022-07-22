@@ -44,7 +44,14 @@ const getPathFromErrorStack = () => {
   return path;
 }
 
-export const getPath = () => {
+/**
+ * Cross platform implementation for `__filename`.
+ * 
+ * @note Please do not use this method in nested other methods,
+ * instead always use it in the root of your file, otherwise it may return wrong results. 
+ * @returns What `__filename` would return in CJS
+ */
+export const filename = () => {
   let path = getPathFromErrorStack();
 
   if(!path) {
@@ -67,19 +74,13 @@ export const getPath = () => {
 
 /**
  * Cross platform implementation for `__dirname`.
+ * 
+ * @note Please do not use this method in nested other methods,
+ * instead always use it in the root of your file, otherwise it may return wrong results. 
  * @returns What `__dirname` would return in CJS
  */
 export const dirname = () => {
-  let path = getPath();
+  let path = filename();
   const dirname = pathDirname(path)
   return dirname
-}
-
-/**
- * Cross platform implementation for `__filename`.
- * @returns What `__filename` would return in CJS
- */
-export const filename = () => {
-  let path = getPath();
-  return path
 }

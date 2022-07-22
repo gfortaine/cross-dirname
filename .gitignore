@@ -2,4 +2,4 @@ dist/
 node_modules/
 package-lock.json
 examples/gjs/index.js
-test/browser/dirname.test.js
+test/browser/base.test.js

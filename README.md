@@ -116,8 +116,8 @@ This module has been tested on the following platforms:
 | Gjs     | NO-ESM | Linux    | TODO     |
 | Gjs     | NO-ESM | MacOS    | TODO     |
 | Gjs     | NO-ESM | Windows  | TODO     |
-| Chrome  | ESM    | Browser  | NO ERROR |
-| Chrome  | CJS    | Browser  | NO ERROR |
+| Chrome  | ESM    | Browser  | ✔        |
+| Chrome  | CJS    | Browser  | ✔        |
 
 You can run all tests with:
 
