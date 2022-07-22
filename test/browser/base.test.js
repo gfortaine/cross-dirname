@@ -1,23 +1,76 @@
 "use strict";
 (() => {
-  var __create = Object.create;
-  var __defProp = Object.defineProperty;
-  var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
   var __getOwnPropNames = Object.getOwnPropertyNames;
-  var __getProtoOf = Object.getPrototypeOf;
-  var __hasOwnProp = Object.prototype.hasOwnProperty;
   var __commonJS = (cb, mod) => function __require() {
     return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
   };
-  var __copyProps = (to, from, except, desc) => {
-    if (from && typeof from === "object" || typeof from === "function") {
-      for (let key of __getOwnPropNames(from))
-        if (!__hasOwnProp.call(to, key) && key !== except)
-          __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+
+  // dist/cjs/index.cjs
+  var require_cjs = __commonJS({
+    "dist/cjs/index.cjs"(exports) {
+      "use strict";
+      Object.defineProperty(exports, "__esModule", { value: true });
+      exports.filename = exports.dirname = exports.getPath = void 0;
+      var DIRNAME_POSIX_REGEX = /^((?:\.(?![^\/]))|(?:(?:\/?|)(?:[\s\S]*?)))(?:\/+?|)(?:(?:\.{1,2}|[^\/]+?|)(?:\.[^.\/]*|))(?:[\/]*)$/;
+      var DIRNAME_WIN32_REGEX = /^((?:\.(?![^\\]))|(?:(?:\\?|)(?:[\s\S]*?)))(?:\\+?|)(?:(?:\.{1,2}|[^\\]+?|)(?:\.[^.\\]*|))(?:[\\]*)$/;
+      var EXTRACT_PATH_REGEX = /@?(?<path>[file:\/\/]?[^\(\s]+):[0-9]+:[0-9]+/;
+      var WIN_POSIX_DRIVE_REGEX = /^\/[A-Z]:\/*/;
+      var pathDirname = (path) => {
+        let dirname2 = DIRNAME_POSIX_REGEX.exec(path)?.[1];
+        if (!dirname2) {
+          dirname2 = DIRNAME_WIN32_REGEX.exec(path)?.[1];
+        }
+        if (!dirname2) {
+          throw new Error(`Can't extract dirname from ${path}`);
+        }
+        return dirname2;
+      };
+      var getPathFromErrorStack = () => {
+        let path;
+        const stack = new Error().stack;
+        if (!stack) {
+          throw new Error("Error has no stack!");
+        }
+        let initiator = stack.split("\n").slice(4, 5)[0];
+        if (!initiator) {
+          initiator = stack.split("\n").slice(3, 4)[0];
+        }
+        if (initiator) {
+          path = EXTRACT_PATH_REGEX.exec(initiator)?.groups?.path;
+        }
+        if (!initiator || !path) {
+          throw new Error("Can't get __dirname!");
+        }
+        return path;
+      };
+      var getPath = () => {
+        let path = getPathFromErrorStack();
+        if (!path) {
+          throw new Error("Can't get path!");
+        }
+        const protocol = "file://";
+        if (path.indexOf(protocol) >= 0) {
+          path = path.slice(protocol.length);
+        }
+        if (WIN_POSIX_DRIVE_REGEX.test(path)) {
+          path = path.slice(1).replace(/\//g, "\\");
+        }
+        return path;
+      };
+      exports.getPath = getPath;
+      var dirname = () => {
+        let path = (0, exports.getPath)();
+        const dirname2 = pathDirname(path);
+        return dirname2;
+      };
+      exports.dirname = dirname;
+      var filename = () => {
+        let path = (0, exports.getPath)();
+        return path;
+      };
+      exports.filename = filename;
     }
-    return to;
-  };
-  var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target, mod));
+  });
 
   // node_modules/assertion-error/index.js
   var require_assertion_error = __commonJS({
@@ -38,15 +91,15 @@
           return res;
         };
       }
-      module.exports = AssertionError2;
-      function AssertionError2(message, _props, ssf) {
+      module.exports = AssertionError;
+      function AssertionError(message, _props, ssf) {
         var extend = exclude("name", "message", "stack", "constructor", "toJSON"), props = extend(_props || {});
         this.message = message || "Unspecified AssertionError";
         this.showDiff = false;
         for (var key in props) {
           this[key] = props[key];
         }
-        ssf = ssf || AssertionError2;
+        ssf = ssf || AssertionError;
         if (Error.captureStackTrace) {
           Error.captureStackTrace(this, ssf);
         } else {
@@ -57,10 +110,10 @@
           }
         }
       }
-      AssertionError2.prototype = Object.create(Error.prototype);
-      AssertionError2.prototype.name = "AssertionError";
-      AssertionError2.prototype.constructor = AssertionError2;
-      AssertionError2.prototype.toJSON = function(stack) {
+      AssertionError.prototype = Object.create(Error.prototype);
+      AssertionError.prototype.name = "AssertionError";
+      AssertionError.prototype.constructor = AssertionError;
+      AssertionError.prototype.toJSON = function(stack) {
         var extend = exclude("constructor", "toJSON", "stack"), props = extend({ name: this.name }, this);
         if (false !== stack && this.stack) {
           props.stack = this.stack;
@@ -317,7 +370,7 @@
   // node_modules/chai/lib/chai/utils/expectTypes.js
   var require_expectTypes = __commonJS({
     "node_modules/chai/lib/chai/utils/expectTypes.js"(exports, module) {
-      var AssertionError2 = require_assertion_error();
+      var AssertionError = require_assertion_error();
       var flag = require_flag();
       var type = require_type_detect();
       module.exports = function expectTypes(obj, types) {
@@ -338,7 +391,7 @@
         if (!types.some(function(expected) {
           return objType === expected;
         })) {
-          throw new AssertionError2(flagMsg + "object tested must be " + str + ", but " + objType + " given", void 0, ssfi);
+          throw new AssertionError(flagMsg + "object tested must be " + str + ", but " + objType + " given", void 0, ssfi);
         }
       };
     }
@@ -1048,14 +1101,14 @@
     "node_modules/chai/lib/chai/utils/inspect.js"(exports, module) {
       var getName = require_get_func_name();
       var loupe = require_loupe();
-      var config2 = require_config();
+      var config = require_config();
       module.exports = inspect;
       function inspect(obj, showHidden, depth, colors) {
         var options = {
           colors,
           depth: typeof depth === "undefined" ? 2 : depth,
           showHidden,
-          truncate: config2.truncateThreshold ? config2.truncateThreshold : Infinity
+          truncate: config.truncateThreshold ? config.truncateThreshold : Infinity
         };
         return loupe.inspect(obj, options);
       }
@@ -1066,10 +1119,10 @@
   var require_objDisplay = __commonJS({
     "node_modules/chai/lib/chai/utils/objDisplay.js"(exports, module) {
       var inspect = require_inspect();
-      var config2 = require_config();
+      var config = require_config();
       module.exports = function objDisplay(obj) {
         var str = inspect(obj), type = Object.prototype.toString.call(obj);
-        if (config2.truncateThreshold && str.length >= config2.truncateThreshold) {
+        if (config.truncateThreshold && str.length >= config.truncateThreshold) {
           if (type === "[object Function]") {
             return !obj.name || obj.name === "" ? "[Function]" : "[Function: " + obj.name + "]";
           } else if (type === "[object Array]") {
@@ -1387,9 +1440,9 @@
   // node_modules/chai/lib/chai/utils/isProxyEnabled.js
   var require_isProxyEnabled = __commonJS({
     "node_modules/chai/lib/chai/utils/isProxyEnabled.js"(exports, module) {
-      var config2 = require_config();
+      var config = require_config();
       module.exports = function isProxyEnabled() {
-        return config2.useProxy && typeof Proxy !== "undefined" && typeof Reflect !== "undefined";
+        return config.useProxy && typeof Proxy !== "undefined" && typeof Reflect !== "undefined";
       };
     }
   });
@@ -1397,7 +1450,7 @@
   // node_modules/chai/lib/chai/utils/addProperty.js
   var require_addProperty = __commonJS({
     "node_modules/chai/lib/chai/utils/addProperty.js"(exports, module) {
-      var chai2 = require_chai();
+      var chai = require_chai();
       var flag = require_flag();
       var isProxyEnabled = require_isProxyEnabled();
       var transferFlags = require_transferFlags();
@@ -1412,7 +1465,7 @@
             var result = getter.call(this);
             if (result !== void 0)
               return result;
-            var newAssertion = new chai2.Assertion();
+            var newAssertion = new chai.Assertion();
             transferFlags(this, newAssertion);
             return newAssertion;
           },
@@ -1466,7 +1519,7 @@
   // node_modules/chai/lib/chai/utils/proxify.js
   var require_proxify = __commonJS({
     "node_modules/chai/lib/chai/utils/proxify.js"(exports, module) {
-      var config2 = require_config();
+      var config = require_config();
       var flag = require_flag();
       var getProperties = require_getProperties();
       var isProxyEnabled = require_isProxyEnabled();
@@ -1476,7 +1529,7 @@
           return obj;
         return new Proxy(obj, {
           get: function proxyGetter(target, property) {
-            if (typeof property === "string" && config2.proxyExcludedKeys.indexOf(property) === -1 && !Reflect.has(target, property)) {
+            if (typeof property === "string" && config.proxyExcludedKeys.indexOf(property) === -1 && !Reflect.has(target, property)) {
               if (nonChainableMethodName) {
                 throw Error("Invalid Chai property: " + nonChainableMethodName + "." + property + '. See docs for proper usage of "' + nonChainableMethodName + '".');
               }
@@ -1535,7 +1588,7 @@
   var require_addMethod = __commonJS({
     "node_modules/chai/lib/chai/utils/addMethod.js"(exports, module) {
       var addLengthGuard = require_addLengthGuard();
-      var chai2 = require_chai();
+      var chai = require_chai();
       var flag = require_flag();
       var proxify = require_proxify();
       var transferFlags = require_transferFlags();
@@ -1547,7 +1600,7 @@
           var result = method.apply(this, arguments);
           if (result !== void 0)
             return result;
-          var newAssertion = new chai2.Assertion();
+          var newAssertion = new chai.Assertion();
           transferFlags(this, newAssertion);
           return newAssertion;
         };
@@ -1560,7 +1613,7 @@
   // node_modules/chai/lib/chai/utils/overwriteProperty.js
   var require_overwriteProperty = __commonJS({
     "node_modules/chai/lib/chai/utils/overwriteProperty.js"(exports, module) {
-      var chai2 = require_chai();
+      var chai = require_chai();
       var flag = require_flag();
       var isProxyEnabled = require_isProxyEnabled();
       var transferFlags = require_transferFlags();
@@ -1581,7 +1634,7 @@
             if (result !== void 0) {
               return result;
             }
-            var newAssertion = new chai2.Assertion();
+            var newAssertion = new chai.Assertion();
             transferFlags(this, newAssertion);
             return newAssertion;
           },
@@ -1595,7 +1648,7 @@
   var require_overwriteMethod = __commonJS({
     "node_modules/chai/lib/chai/utils/overwriteMethod.js"(exports, module) {
       var addLengthGuard = require_addLengthGuard();
-      var chai2 = require_chai();
+      var chai = require_chai();
       var flag = require_flag();
       var proxify = require_proxify();
       var transferFlags = require_transferFlags();
@@ -1616,7 +1669,7 @@
           if (result !== void 0) {
             return result;
           }
-          var newAssertion = new chai2.Assertion();
+          var newAssertion = new chai.Assertion();
           transferFlags(this, newAssertion);
           return newAssertion;
         };
@@ -1630,7 +1683,7 @@
   var require_addChainableMethod = __commonJS({
     "node_modules/chai/lib/chai/utils/addChainableMethod.js"(exports, module) {
       var addLengthGuard = require_addLengthGuard();
-      var chai2 = require_chai();
+      var chai = require_chai();
       var flag = require_flag();
       var proxify = require_proxify();
       var transferFlags = require_transferFlags();
@@ -1669,7 +1722,7 @@
               if (result !== void 0) {
                 return result;
               }
-              var newAssertion = new chai2.Assertion();
+              var newAssertion = new chai.Assertion();
               transferFlags(this, newAssertion);
               return newAssertion;
             };
@@ -1701,7 +1754,7 @@
   // node_modules/chai/lib/chai/utils/overwriteChainableMethod.js
   var require_overwriteChainableMethod = __commonJS({
     "node_modules/chai/lib/chai/utils/overwriteChainableMethod.js"(exports, module) {
-      var chai2 = require_chai();
+      var chai = require_chai();
       var transferFlags = require_transferFlags();
       module.exports = function overwriteChainableMethod(ctx, name, method, chainingBehavior) {
         var chainableBehavior = ctx.__methods[name];
@@ -1711,7 +1764,7 @@
           if (result !== void 0) {
             return result;
           }
-          var newAssertion = new chai2.Assertion();
+          var newAssertion = new chai.Assertion();
           transferFlags(this, newAssertion);
           return newAssertion;
         };
@@ -1721,7 +1774,7 @@
           if (result !== void 0) {
             return result;
           }
-          var newAssertion = new chai2.Assertion();
+          var newAssertion = new chai.Assertion();
           transferFlags(this, newAssertion);
           return newAssertion;
         };
@@ -1911,79 +1964,79 @@
   // node_modules/chai/lib/chai/assertion.js
   var require_assertion = __commonJS({
     "node_modules/chai/lib/chai/assertion.js"(exports, module) {
-      var config2 = require_config();
-      module.exports = function(_chai, util2) {
-        var AssertionError2 = _chai.AssertionError, flag = util2.flag;
-        _chai.Assertion = Assertion2;
-        function Assertion2(obj, msg, ssfi, lockSsfi) {
-          flag(this, "ssfi", ssfi || Assertion2);
+      var config = require_config();
+      module.exports = function(_chai, util) {
+        var AssertionError = _chai.AssertionError, flag = util.flag;
+        _chai.Assertion = Assertion;
+        function Assertion(obj, msg, ssfi, lockSsfi) {
+          flag(this, "ssfi", ssfi || Assertion);
           flag(this, "lockSsfi", lockSsfi);
           flag(this, "object", obj);
           flag(this, "message", msg);
-          return util2.proxify(this);
+          return util.proxify(this);
         }
-        Object.defineProperty(Assertion2, "includeStack", {
+        Object.defineProperty(Assertion, "includeStack", {
           get: function() {
             console.warn("Assertion.includeStack is deprecated, use chai.config.includeStack instead.");
-            return config2.includeStack;
+            return config.includeStack;
           },
           set: function(value) {
             console.warn("Assertion.includeStack is deprecated, use chai.config.includeStack instead.");
-            config2.includeStack = value;
+            config.includeStack = value;
           }
         });
-        Object.defineProperty(Assertion2, "showDiff", {
+        Object.defineProperty(Assertion, "showDiff", {
           get: function() {
             console.warn("Assertion.showDiff is deprecated, use chai.config.showDiff instead.");
-            return config2.showDiff;
+            return config.showDiff;
           },
           set: function(value) {
             console.warn("Assertion.showDiff is deprecated, use chai.config.showDiff instead.");
-            config2.showDiff = value;
+            config.showDiff = value;
           }
         });
-        Assertion2.addProperty = function(name, fn) {
-          util2.addProperty(this.prototype, name, fn);
+        Assertion.addProperty = function(name, fn) {
+          util.addProperty(this.prototype, name, fn);
         };
-        Assertion2.addMethod = function(name, fn) {
-          util2.addMethod(this.prototype, name, fn);
+        Assertion.addMethod = function(name, fn) {
+          util.addMethod(this.prototype, name, fn);
         };
-        Assertion2.addChainableMethod = function(name, fn, chainingBehavior) {
-          util2.addChainableMethod(this.prototype, name, fn, chainingBehavior);
+        Assertion.addChainableMethod = function(name, fn, chainingBehavior) {
+          util.addChainableMethod(this.prototype, name, fn, chainingBehavior);
         };
-        Assertion2.overwriteProperty = function(name, fn) {
-          util2.overwriteProperty(this.prototype, name, fn);
+        Assertion.overwriteProperty = function(name, fn) {
+          util.overwriteProperty(this.prototype, name, fn);
         };
-        Assertion2.overwriteMethod = function(name, fn) {
-          util2.overwriteMethod(this.prototype, name, fn);
+        Assertion.overwriteMethod = function(name, fn) {
+          util.overwriteMethod(this.prototype, name, fn);
         };
-        Assertion2.overwriteChainableMethod = function(name, fn, chainingBehavior) {
-          util2.overwriteChainableMethod(this.prototype, name, fn, chainingBehavior);
+        Assertion.overwriteChainableMethod = function(name, fn, chainingBehavior) {
+          util.overwriteChainableMethod(this.prototype, name, fn, chainingBehavior);
         };
-        Assertion2.prototype.assert = function(expr, msg, negateMsg, expected, _actual, showDiff) {
-          var ok = util2.test(this, arguments);
+        Assertion.prototype.assert = function(expr, msg, negateMsg, expected, _actual, showDiff) {
+          var ok = util.test(this, arguments);
           if (false !== showDiff)
             showDiff = true;
           if (void 0 === expected && void 0 === _actual)
             showDiff = false;
-          if (true !== config2.showDiff)
+          if (true !== config.showDiff)
             showDiff = false;
           if (!ok) {
-            msg = util2.getMessage(this, arguments);
-            var actual = util2.getActual(this, arguments);
+            msg = util.getMessage(this, arguments);
+            var actual = util.getActual(this, arguments);
             var assertionErrorObjectProperties = {
               actual,
               expected,
               showDiff
             };
-            var operator = util2.getOperator(this, arguments);
+            var operator = util.getOperator(this, arguments);
             if (operator) {
               assertionErrorObjectProperties.operator = operator;
             }
-            throw new AssertionError2(msg, assertionErrorObjectProperties, config2.includeStack ? this.assert : flag(this, "ssfi"));
+            throw new AssertionError(msg, assertionErrorObjectProperties, config.includeStack ? this.assert : flag(this, "ssfi"));
           }
         };
-        Object.defineProperty(Assertion2.prototype, "_obj", {
+        Object.defineProperty(Assertion.prototype, "_obj", {
           get: function() {
             return flag(this, "object");
           },
@@ -1998,8 +2051,8 @@
   // node_modules/chai/lib/chai/core/assertions.js
   var require_assertions = __commonJS({
     "node_modules/chai/lib/chai/core/assertions.js"(exports, module) {
-      module.exports = function(chai2, _) {
-        var Assertion2 = chai2.Assertion, AssertionError2 = chai2.AssertionError, flag = _.flag;
+      module.exports = function(chai, _) {
+        var Assertion = chai.Assertion, AssertionError = chai.AssertionError, flag = _.flag;
         [
           "to",
           "be",
@@ -2019,28 +2072,28 @@
           "still",
           "also"
         ].forEach(function(chain) {
-          Assertion2.addProperty(chain);
+          Assertion.addProperty(chain);
         });
-        Assertion2.addProperty("not", function() {
+        Assertion.addProperty("not", function() {
           flag(this, "negate", true);
         });
-        Assertion2.addProperty("deep", function() {
+        Assertion.addProperty("deep", function() {
           flag(this, "deep", true);
         });
-        Assertion2.addProperty("nested", function() {
+        Assertion.addProperty("nested", function() {
           flag(this, "nested", true);
         });
-        Assertion2.addProperty("own", function() {
+        Assertion.addProperty("own", function() {
           flag(this, "own", true);
         });
-        Assertion2.addProperty("ordered", function() {
+        Assertion.addProperty("ordered", function() {
           flag(this, "ordered", true);
         });
-        Assertion2.addProperty("any", function() {
+        Assertion.addProperty("any", function() {
           flag(this, "any", true);
           flag(this, "all", false);
         });
-        Assertion2.addProperty("all", function() {
+        Assertion.addProperty("all", function() {
           flag(this, "all", true);
           flag(this, "any", false);
         });
@@ -2051,8 +2104,8 @@
           var obj = flag(this, "object"), article = ~["a", "e", "i", "o", "u"].indexOf(type.charAt(0)) ? "an " : "a ";
           this.assert(type === _.type(obj).toLowerCase(), "expected #{this} to be " + article + type, "expected #{this} not to be " + article + type);
         }
-        Assertion2.addChainableMethod("an", an);
-        Assertion2.addChainableMethod("a", an);
+        Assertion.addChainableMethod("an", an);
+        Assertion.addChainableMethod("a", an);
         function SameValueZero(a, b) {
           return _.isNaN(a) && _.isNaN(b) || a === b;
         }
@@ -2071,7 +2124,7 @@
               break;
             case "weakset":
               if (isDeep) {
-                throw new AssertionError2(flagMsg + "unable to use .deep.include with WeakSet", void 0, ssfi);
+                throw new AssertionError(flagMsg + "unable to use .deep.include with WeakSet", void 0, ssfi);
               }
               included = obj.has(val);
               break;
@@ -2101,11 +2154,11 @@
               break;
             default:
               if (val !== Object(val)) {
-                throw new AssertionError2(flagMsg + "the given combination of arguments (" + objType + " and " + _.type(val).toLowerCase() + ") is invalid for this assertion. You can use an array, a map, an object, a set, a string, or a weakset instead of a " + _.type(val).toLowerCase(), void 0, ssfi);
+                throw new AssertionError(flagMsg + "the given combination of arguments (" + objType + " and " + _.type(val).toLowerCase() + ") is invalid for this assertion. You can use an array, a map, an object, a set, a string, or a weakset instead of a " + _.type(val).toLowerCase(), void 0, ssfi);
               }
               var props = Object.keys(val), firstErr = null, numErrs = 0;
               props.forEach(function(prop) {
-                var propAssertion = new Assertion2(obj);
+                var propAssertion = new Assertion(obj);
                 _.transferFlags(this, propAssertion, true);
                 flag(propAssertion, "lockSsfi", true);
                 if (!negate || props.length === 1) {
@@ -2115,7 +2168,7 @@
                 try {
                   propAssertion.property(prop, val[prop]);
                 } catch (err) {
-                  if (!_.checkError.compatibleConstructor(err, AssertionError2)) {
+                  if (!_.checkError.compatibleConstructor(err, AssertionError)) {
                     throw err;
                   }
                   if (firstErr === null)
@@ -2130,35 +2183,35 @@
           }
           this.assert(included, "expected #{this} to " + descriptor + "include " + _.inspect(val), "expected #{this} to not " + descriptor + "include " + _.inspect(val));
         }
-        Assertion2.addChainableMethod("include", include, includeChainingBehavior);
-        Assertion2.addChainableMethod("contain", include, includeChainingBehavior);
-        Assertion2.addChainableMethod("contains", include, includeChainingBehavior);
-        Assertion2.addChainableMethod("includes", include, includeChainingBehavior);
-        Assertion2.addProperty("ok", function() {
+        Assertion.addChainableMethod("include", include, includeChainingBehavior);
+        Assertion.addChainableMethod("contain", include, includeChainingBehavior);
+        Assertion.addChainableMethod("contains", include, includeChainingBehavior);
+        Assertion.addChainableMethod("includes", include, includeChainingBehavior);
+        Assertion.addProperty("ok", function() {
           this.assert(flag(this, "object"), "expected #{this} to be truthy", "expected #{this} to be falsy");
         });
-        Assertion2.addProperty("true", function() {
+        Assertion.addProperty("true", function() {
           this.assert(true === flag(this, "object"), "expected #{this} to be true", "expected #{this} to be false", flag(this, "negate") ? false : true);
         });
-        Assertion2.addProperty("false", function() {
+        Assertion.addProperty("false", function() {
           this.assert(false === flag(this, "object"), "expected #{this} to be false", "expected #{this} to be true", flag(this, "negate") ? true : false);
         });
-        Assertion2.addProperty("null", function() {
+        Assertion.addProperty("null", function() {
           this.assert(null === flag(this, "object"), "expected #{this} to be null", "expected #{this} not to be null");
         });
-        Assertion2.addProperty("undefined", function() {
+        Assertion.addProperty("undefined", function() {
           this.assert(void 0 === flag(this, "object"), "expected #{this} to be undefined", "expected #{this} not to be undefined");
         });
-        Assertion2.addProperty("NaN", function() {
+        Assertion.addProperty("NaN", function() {
           this.assert(_.isNaN(flag(this, "object")), "expected #{this} to be NaN", "expected #{this} not to be NaN");
         });
         function assertExist() {
           var val = flag(this, "object");
           this.assert(val !== null && val !== void 0, "expected #{this} to exist", "expected #{this} to not exist");
         }
-        Assertion2.addProperty("exist", assertExist);
-        Assertion2.addProperty("exists", assertExist);
-        Assertion2.addProperty("empty", function() {
+        Assertion.addProperty("exist", assertExist);
+        Assertion.addProperty("exists", assertExist);
+        Assertion.addProperty("empty", function() {
           var val = flag(this, "object"), ssfi = flag(this, "ssfi"), flagMsg = flag(this, "message"), itemsCount;
           flagMsg = flagMsg ? flagMsg + ": " : "";
           switch (_.type(val).toLowerCase()) {
@@ -2172,13 +2225,13 @@
               break;
             case "weakmap":
             case "weakset":
-              throw new AssertionError2(flagMsg + ".empty was passed a weak collection", void 0, ssfi);
+              throw new AssertionError(flagMsg + ".empty was passed a weak collection", void 0, ssfi);
             case "function":
               var msg = flagMsg + ".empty was passed a function " + _.getName(val);
-              throw new AssertionError2(msg.trim(), void 0, ssfi);
+              throw new AssertionError(msg.trim(), void 0, ssfi);
             default:
               if (val !== Object(val)) {
-                throw new AssertionError2(flagMsg + ".empty was passed non-string primitive " + _.inspect(val), void 0, ssfi);
+                throw new AssertionError(flagMsg + ".empty was passed non-string primitive " + _.inspect(val), void 0, ssfi);
               }
               itemsCount = Object.keys(val).length;
           }
@@ -2188,8 +2241,8 @@
           var obj = flag(this, "object"), type = _.type(obj);
           this.assert("Arguments" === type, "expected #{this} to be arguments but got " + type, "expected #{this} to not be arguments");
         }
-        Assertion2.addProperty("arguments", checkArguments);
-        Assertion2.addProperty("Arguments", checkArguments);
+        Assertion.addProperty("arguments", checkArguments);
+        Assertion.addProperty("Arguments", checkArguments);
         function assertEqual(val, msg) {
           if (msg)
             flag(this, "message", msg);
@@ -2203,22 +2256,22 @@
             this.assert(val === obj, "expected #{this} to equal #{exp}", "expected #{this} to not equal #{exp}", val, this._obj, true);
           }
         }
-        Assertion2.addMethod("equal", assertEqual);
-        Assertion2.addMethod("equals", assertEqual);
-        Assertion2.addMethod("eq", assertEqual);
+        Assertion.addMethod("equal", assertEqual);
+        Assertion.addMethod("equals", assertEqual);
+        Assertion.addMethod("eq", assertEqual);
         function assertEql(obj, msg) {
           if (msg)
             flag(this, "message", msg);
           this.assert(_.eql(obj, flag(this, "object")), "expected #{this} to deeply equal #{exp}", "expected #{this} to not deeply equal #{exp}", obj, this._obj, true);
         }
-        Assertion2.addMethod("eql", assertEql);
-        Assertion2.addMethod("eqls", assertEql);
+        Assertion.addMethod("eql", assertEql);
+        Assertion.addMethod("eqls", assertEql);
         function assertAbove(n, msg) {
           if (msg)
             flag(this, "message", msg);
           var obj = flag(this, "object"), doLength = flag(this, "doLength"), flagMsg = flag(this, "message"), msgPrefix = flagMsg ? flagMsg + ": " : "", ssfi = flag(this, "ssfi"), objType = _.type(obj).toLowerCase(), nType = _.type(n).toLowerCase(), errorMessage, shouldThrow = true;
           if (doLength && objType !== "map" && objType !== "set") {
-            new Assertion2(obj, flagMsg, ssfi, true).to.have.property("length");
+            new Assertion(obj, flagMsg, ssfi, true).to.have.property("length");
           }
           if (!doLength && (objType === "date" && nType !== "date")) {
             errorMessage = msgPrefix + "the argument to above must be a date";
@@ -2231,7 +2284,7 @@
             shouldThrow = false;
           }
           if (shouldThrow) {
-            throw new AssertionError2(errorMessage, void 0, ssfi);
+            throw new AssertionError(errorMessage, void 0, ssfi);
           }
           if (doLength) {
             var descriptor = "length", itemsCount;
@@ -2246,15 +2299,15 @@
             this.assert(obj > n, "expected #{this} to be above #{exp}", "expected #{this} to be at most #{exp}", n);
           }
         }
-        Assertion2.addMethod("above", assertAbove);
-        Assertion2.addMethod("gt", assertAbove);
-        Assertion2.addMethod("greaterThan", assertAbove);
+        Assertion.addMethod("above", assertAbove);
+        Assertion.addMethod("gt", assertAbove);
+        Assertion.addMethod("greaterThan", assertAbove);
         function assertLeast(n, msg) {
           if (msg)
             flag(this, "message", msg);
           var obj = flag(this, "object"), doLength = flag(this, "doLength"), flagMsg = flag(this, "message"), msgPrefix = flagMsg ? flagMsg + ": " : "", ssfi = flag(this, "ssfi"), objType = _.type(obj).toLowerCase(), nType = _.type(n).toLowerCase(), errorMessage, shouldThrow = true;
           if (doLength && objType !== "map" && objType !== "set") {
-            new Assertion2(obj, flagMsg, ssfi, true).to.have.property("length");
+            new Assertion(obj, flagMsg, ssfi, true).to.have.property("length");
           }
           if (!doLength && (objType === "date" && nType !== "date")) {
             errorMessage = msgPrefix + "the argument to least must be a date";
@@ -2267,7 +2320,7 @@
             shouldThrow = false;
           }
           if (shouldThrow) {
-            throw new AssertionError2(errorMessage, void 0, ssfi);
+            throw new AssertionError(errorMessage, void 0, ssfi);
           }
           if (doLength) {
             var descriptor = "length", itemsCount;
@@ -2282,15 +2335,15 @@
             this.assert(obj >= n, "expected #{this} to be at least #{exp}", "expected #{this} to be below #{exp}", n);
           }
         }
-        Assertion2.addMethod("least", assertLeast);
-        Assertion2.addMethod("gte", assertLeast);
-        Assertion2.addMethod("greaterThanOrEqual", assertLeast);
+        Assertion.addMethod("least", assertLeast);
+        Assertion.addMethod("gte", assertLeast);
+        Assertion.addMethod("greaterThanOrEqual", assertLeast);
         function assertBelow(n, msg) {
           if (msg)
             flag(this, "message", msg);
           var obj = flag(this, "object"), doLength = flag(this, "doLength"), flagMsg = flag(this, "message"), msgPrefix = flagMsg ? flagMsg + ": " : "", ssfi = flag(this, "ssfi"), objType = _.type(obj).toLowerCase(), nType = _.type(n).toLowerCase(), errorMessage, shouldThrow = true;
           if (doLength && objType !== "map" && objType !== "set") {
-            new Assertion2(obj, flagMsg, ssfi, true).to.have.property("length");
+            new Assertion(obj, flagMsg, ssfi, true).to.have.property("length");
           }
           if (!doLength && (objType === "date" && nType !== "date")) {
             errorMessage = msgPrefix + "the argument to below must be a date";
@@ -2303,7 +2356,7 @@
             shouldThrow = false;
           }
           if (shouldThrow) {
-            throw new AssertionError2(errorMessage, void 0, ssfi);
+            throw new AssertionError(errorMessage, void 0, ssfi);
           }
           if (doLength) {
             var descriptor = "length", itemsCount;
@@ -2318,15 +2371,15 @@
             this.assert(obj < n, "expected #{this} to be below #{exp}", "expected #{this} to be at least #{exp}", n);
           }
         }
-        Assertion2.addMethod("below", assertBelow);
-        Assertion2.addMethod("lt", assertBelow);
-        Assertion2.addMethod("lessThan", assertBelow);
+        Assertion.addMethod("below", assertBelow);
+        Assertion.addMethod("lt", assertBelow);
+        Assertion.addMethod("lessThan", assertBelow);
         function assertMost(n, msg) {
           if (msg)
             flag(this, "message", msg);
           var obj = flag(this, "object"), doLength = flag(this, "doLength"), flagMsg = flag(this, "message"), msgPrefix = flagMsg ? flagMsg + ": " : "", ssfi = flag(this, "ssfi"), objType = _.type(obj).toLowerCase(), nType = _.type(n).toLowerCase(), errorMessage, shouldThrow = true;
           if (doLength && objType !== "map" && objType !== "set") {
-            new Assertion2(obj, flagMsg, ssfi, true).to.have.property("length");
+            new Assertion(obj, flagMsg, ssfi, true).to.have.property("length");
           }
           if (!doLength && (objType === "date" && nType !== "date")) {
             errorMessage = msgPrefix + "the argument to most must be a date";
@@ -2339,7 +2392,7 @@
             shouldThrow = false;
           }
           if (shouldThrow) {
-            throw new AssertionError2(errorMessage, void 0, ssfi);
+            throw new AssertionError(errorMessage, void 0, ssfi);
           }
           if (doLength) {
             var descriptor = "length", itemsCount;
@@ -2354,15 +2407,15 @@
             this.assert(obj <= n, "expected #{this} to be at most #{exp}", "expected #{this} to be above #{exp}", n);
           }
         }
-        Assertion2.addMethod("most", assertMost);
-        Assertion2.addMethod("lte", assertMost);
-        Assertion2.addMethod("lessThanOrEqual", assertMost);
-        Assertion2.addMethod("within", function(start, finish, msg) {
+        Assertion.addMethod("most", assertMost);
+        Assertion.addMethod("lte", assertMost);
+        Assertion.addMethod("lessThanOrEqual", assertMost);
+        Assertion.addMethod("within", function(start, finish, msg) {
           if (msg)
             flag(this, "message", msg);
           var obj = flag(this, "object"), doLength = flag(this, "doLength"), flagMsg = flag(this, "message"), msgPrefix = flagMsg ? flagMsg + ": " : "", ssfi = flag(this, "ssfi"), objType = _.type(obj).toLowerCase(), startType = _.type(start).toLowerCase(), finishType = _.type(finish).toLowerCase(), errorMessage, shouldThrow = true, range = startType === "date" && finishType === "date" ? start.toISOString() + ".." + finish.toISOString() : start + ".." + finish;
           if (doLength && objType !== "map" && objType !== "set") {
-            new Assertion2(obj, flagMsg, ssfi, true).to.have.property("length");
+            new Assertion(obj, flagMsg, ssfi, true).to.have.property("length");
           }
           if (!doLength && (objType === "date" && (startType !== "date" || finishType !== "date"))) {
             errorMessage = msgPrefix + "the arguments to within must be dates";
@@ -2375,7 +2428,7 @@
             shouldThrow = false;
           }
           if (shouldThrow) {
-            throw new AssertionError2(errorMessage, void 0, ssfi);
+            throw new AssertionError(errorMessage, void 0, ssfi);
           }
           if (doLength) {
             var descriptor = "length", itemsCount;
@@ -2401,7 +2454,7 @@
           } catch (err) {
             if (err instanceof TypeError) {
               flagMsg = flagMsg ? flagMsg + ": " : "";
-              throw new AssertionError2(flagMsg + "The instanceof assertion needs a constructor but " + _.type(constructor) + " was given.", void 0, ssfi);
+              throw new AssertionError(flagMsg + "The instanceof assertion needs a constructor but " + _.type(constructor) + " was given.", void 0, ssfi);
             }
             throw err;
           }
@@ -2412,8 +2465,8 @@
           this.assert(isInstanceOf, "expected #{this} to be an instance of " + name, "expected #{this} to not be an instance of " + name);
         }
         ;
-        Assertion2.addMethod("instanceof", assertInstanceOf);
-        Assertion2.addMethod("instanceOf", assertInstanceOf);
+        Assertion.addMethod("instanceof", assertInstanceOf);
+        Assertion.addMethod("instanceOf", assertInstanceOf);
         function assertProperty(name, val, msg) {
           if (msg)
             flag(this, "message", msg);
@@ -2421,18 +2474,18 @@
           flagMsg = flagMsg ? flagMsg + ": " : "";
           if (isNested) {
             if (nameType !== "string") {
-              throw new AssertionError2(flagMsg + "the argument to property must be a string when using nested syntax", void 0, ssfi);
+              throw new AssertionError(flagMsg + "the argument to property must be a string when using nested syntax", void 0, ssfi);
             }
           } else {
             if (nameType !== "string" && nameType !== "number" && nameType !== "symbol") {
-              throw new AssertionError2(flagMsg + "the argument to property must be a string, number, or symbol", void 0, ssfi);
+              throw new AssertionError(flagMsg + "the argument to property must be a string, number, or symbol", void 0, ssfi);
             }
           }
           if (isNested && isOwn) {
-            throw new AssertionError2(flagMsg + 'The "nested" and "own" flags cannot be combined.', void 0, ssfi);
+            throw new AssertionError(flagMsg + 'The "nested" and "own" flags cannot be combined.', void 0, ssfi);
           }
           if (obj === null || obj === void 0) {
-            throw new AssertionError2(flagMsg + "Target cannot be null or undefined.", void 0, ssfi);
+            throw new AssertionError(flagMsg + "Target cannot be null or undefined.", void 0, ssfi);
           }
           var isDeep = flag(this, "deep"), negate = flag(this, "negate"), pathInfo = isNested ? _.getPathInfo(obj, name) : null, value = isNested ? pathInfo.value : obj[name];
           var descriptor = "";
@@ -2458,13 +2511,13 @@
           }
           flag(this, "object", value);
         }
-        Assertion2.addMethod("property", assertProperty);
+        Assertion.addMethod("property", assertProperty);
         function assertOwnProperty(name, value, msg) {
           flag(this, "own", true);
           assertProperty.apply(this, arguments);
         }
-        Assertion2.addMethod("ownProperty", assertOwnProperty);
-        Assertion2.addMethod("haveOwnProperty", assertOwnProperty);
+        Assertion.addMethod("ownProperty", assertOwnProperty);
+        Assertion.addMethod("haveOwnProperty", assertOwnProperty);
         function assertOwnPropertyDescriptor(name, descriptor, msg) {
           if (typeof descriptor === "string") {
             msg = descriptor;
@@ -2481,8 +2534,8 @@
           }
           flag(this, "object", actualDescriptor);
         }
-        Assertion2.addMethod("ownPropertyDescriptor", assertOwnPropertyDescriptor);
-        Assertion2.addMethod("haveOwnPropertyDescriptor", assertOwnPropertyDescriptor);
+        Assertion.addMethod("ownPropertyDescriptor", assertOwnPropertyDescriptor);
+        Assertion.addMethod("haveOwnPropertyDescriptor", assertOwnPropertyDescriptor);
         function assertLengthChain() {
           flag(this, "doLength", true);
         }
@@ -2497,26 +2550,26 @@
               itemsCount = obj.size;
               break;
             default:
-              new Assertion2(obj, flagMsg, ssfi, true).to.have.property("length");
+              new Assertion(obj, flagMsg, ssfi, true).to.have.property("length");
               itemsCount = obj.length;
           }
           this.assert(itemsCount == n, "expected #{this} to have a " + descriptor + " of #{exp} but got #{act}", "expected #{this} to not have a " + descriptor + " of #{act}", n, itemsCount);
         }
-        Assertion2.addChainableMethod("length", assertLength, assertLengthChain);
-        Assertion2.addChainableMethod("lengthOf", assertLength, assertLengthChain);
+        Assertion.addChainableMethod("length", assertLength, assertLengthChain);
+        Assertion.addChainableMethod("lengthOf", assertLength, assertLengthChain);
         function assertMatch(re, msg) {
           if (msg)
             flag(this, "message", msg);
           var obj = flag(this, "object");
           this.assert(re.exec(obj), "expected #{this} to match " + re, "expected #{this} not to match " + re);
         }
-        Assertion2.addMethod("match", assertMatch);
-        Assertion2.addMethod("matches", assertMatch);
-        Assertion2.addMethod("string", function(str, msg) {
+        Assertion.addMethod("match", assertMatch);
+        Assertion.addMethod("matches", assertMatch);
+        Assertion.addMethod("string", function(str, msg) {
           if (msg)
             flag(this, "message", msg);
           var obj = flag(this, "object"), flagMsg = flag(this, "message"), ssfi = flag(this, "ssfi");
-          new Assertion2(obj, flagMsg, ssfi, true).is.a("string");
+          new Assertion(obj, flagMsg, ssfi, true).is.a("string");
           this.assert(~obj.indexOf(str), "expected #{this} to contain " + _.inspect(str), "expected #{this} to not contain " + _.inspect(str));
         });
         function assertKeys(keys) {
@@ -2537,12 +2590,12 @@
             switch (keysType) {
               case "Array":
                 if (arguments.length > 1) {
-                  throw new AssertionError2(mixedArgsMsg, void 0, ssfi);
+                  throw new AssertionError(mixedArgsMsg, void 0, ssfi);
                 }
                 break;
               case "Object":
                 if (arguments.length > 1) {
-                  throw new AssertionError2(mixedArgsMsg, void 0, ssfi);
+                  throw new AssertionError(mixedArgsMsg, void 0, ssfi);
                 }
                 keys = Object.keys(keys);
                 break;
@@ -2554,7 +2607,7 @@
             });
           }
           if (!keys.length) {
-            throw new AssertionError2(flagMsg + "keys required", void 0, ssfi);
+            throw new AssertionError(flagMsg + "keys required", void 0, ssfi);
           }
           var len = keys.length, any = flag(this, "any"), all = flag(this, "all"), expected = keys;
           if (!any && !all) {
@@ -2603,13 +2656,13 @@
           str = (flag(this, "contains") ? "contain " : "have ") + str;
           this.assert(ok, "expected #{this} to " + deepStr + str, "expected #{this} to not " + deepStr + str, expected.slice(0).sort(_.compareByInspect), actual.sort(_.compareByInspect), true);
         }
-        Assertion2.addMethod("keys", assertKeys);
-        Assertion2.addMethod("key", assertKeys);
+        Assertion.addMethod("keys", assertKeys);
+        Assertion.addMethod("key", assertKeys);
         function assertThrows(errorLike, errMsgMatcher, msg) {
           if (msg)
             flag(this, "message", msg);
           var obj = flag(this, "object"), ssfi = flag(this, "ssfi"), flagMsg = flag(this, "message"), negate = flag(this, "negate") || false;
-          new Assertion2(obj, flagMsg, ssfi, true).is.a("function");
+          new Assertion(obj, flagMsg, ssfi, true).is.a("function");
           if (errorLike instanceof RegExp || typeof errorLike === "string") {
             errMsgMatcher = errorLike;
             errorLike = null;
@@ -2673,18 +2726,18 @@
           flag(this, "object", caughtErr);
         }
         ;
-        Assertion2.addMethod("throw", assertThrows);
-        Assertion2.addMethod("throws", assertThrows);
-        Assertion2.addMethod("Throw", assertThrows);
+        Assertion.addMethod("throw", assertThrows);
+        Assertion.addMethod("throws", assertThrows);
+        Assertion.addMethod("Throw", assertThrows);
         function respondTo(method, msg) {
           if (msg)
             flag(this, "message", msg);
           var obj = flag(this, "object"), itself = flag(this, "itself"), context = "function" === typeof obj && !itself ? obj.prototype[method] : obj[method];
           this.assert("function" === typeof context, "expected #{this} to respond to " + _.inspect(method), "expected #{this} to not respond to " + _.inspect(method));
         }
-        Assertion2.addMethod("respondTo", respondTo);
-        Assertion2.addMethod("respondsTo", respondTo);
-        Assertion2.addProperty("itself", function() {
+        Assertion.addMethod("respondTo", respondTo);
+        Assertion.addMethod("respondsTo", respondTo);
+        Assertion.addProperty("itself", function() {
           flag(this, "itself", true);
         });
         function satisfy(matcher, msg) {
@@ -2694,22 +2747,22 @@
           var result = matcher(obj);
           this.assert(result, "expected #{this} to satisfy " + _.objDisplay(matcher), "expected #{this} to not satisfy" + _.objDisplay(matcher), flag(this, "negate") ? false : true, result);
         }
-        Assertion2.addMethod("satisfy", satisfy);
-        Assertion2.addMethod("satisfies", satisfy);
+        Assertion.addMethod("satisfy", satisfy);
+        Assertion.addMethod("satisfies", satisfy);
         function closeTo(expected, delta, msg) {
           if (msg)
             flag(this, "message", msg);
           var obj = flag(this, "object"), flagMsg = flag(this, "message"), ssfi = flag(this, "ssfi");
-          new Assertion2(obj, flagMsg, ssfi, true).is.a("number");
+          new Assertion(obj, flagMsg, ssfi, true).is.a("number");
           if (typeof expected !== "number" || typeof delta !== "number") {
             flagMsg = flagMsg ? flagMsg + ": " : "";
             var deltaMessage = delta === void 0 ? ", and a delta is required" : "";
-            throw new AssertionError2(flagMsg + "the arguments to closeTo or approximately must be numbers" + deltaMessage, void 0, ssfi);
+            throw new AssertionError(flagMsg + "the arguments to closeTo or approximately must be numbers" + deltaMessage, void 0, ssfi);
           }
           this.assert(Math.abs(obj - expected) <= delta, "expected #{this} to be close to " + expected + " +/- " + delta, "expected #{this} not to be close to " + expected + " +/- " + delta);
         }
-        Assertion2.addMethod("closeTo", closeTo);
-        Assertion2.addMethod("approximately", closeTo);
+        Assertion.addMethod("closeTo", closeTo);
+        Assertion.addMethod("approximately", closeTo);
         function isSubsetOf(subset, superset, cmp, contains, ordered) {
           if (!contains) {
             if (subset.length !== superset.length)
@@ -2736,12 +2789,12 @@
             });
           });
         }
-        Assertion2.addMethod("members", function(subset, msg) {
+        Assertion.addMethod("members", function(subset, msg) {
           if (msg)
             flag(this, "message", msg);
           var obj = flag(this, "object"), flagMsg = flag(this, "message"), ssfi = flag(this, "ssfi");
-          new Assertion2(obj, flagMsg, ssfi, true).to.be.an("array");
-          new Assertion2(subset, flagMsg, ssfi, true).to.be.an("array");
+          new Assertion(obj, flagMsg, ssfi, true).to.be.an("array");
+          new Assertion(subset, flagMsg, ssfi, true).to.be.an("array");
           var contains = flag(this, "contains");
           var ordered = flag(this, "ordered");
           var subject, failMsg, failNegateMsg;
@@ -2761,7 +2814,7 @@
           if (msg)
             flag(this, "message", msg);
           var expected = flag(this, "object"), flagMsg = flag(this, "message"), ssfi = flag(this, "ssfi"), contains = flag(this, "contains"), isDeep = flag(this, "deep");
-          new Assertion2(list, flagMsg, ssfi, true).to.be.an("array");
+          new Assertion(list, flagMsg, ssfi, true).to.be.an("array");
           if (contains) {
             this.assert(list.some(function(possibility) {
               return expected.indexOf(possibility) > -1;
@@ -2776,18 +2829,18 @@
             }
           }
         }
-        Assertion2.addMethod("oneOf", oneOf);
+        Assertion.addMethod("oneOf", oneOf);
         function assertChanges(subject, prop, msg) {
           if (msg)
             flag(this, "message", msg);
           var fn = flag(this, "object"), flagMsg = flag(this, "message"), ssfi = flag(this, "ssfi");
-          new Assertion2(fn, flagMsg, ssfi, true).is.a("function");
+          new Assertion(fn, flagMsg, ssfi, true).is.a("function");
           var initial;
           if (!prop) {
-            new Assertion2(subject, flagMsg, ssfi, true).is.a("function");
+            new Assertion(subject, flagMsg, ssfi, true).is.a("function");
             initial = subject();
           } else {
-            new Assertion2(subject, flagMsg, ssfi, true).to.have.property(prop);
+            new Assertion(subject, flagMsg, ssfi, true).to.have.property(prop);
             initial = subject[prop];
           }
           fn();
@@ -2800,22 +2853,22 @@
           flag(this, "realDelta", final !== initial);
           this.assert(initial !== final, "expected " + msgObj + " to change", "expected " + msgObj + " to not change");
         }
-        Assertion2.addMethod("change", assertChanges);
-        Assertion2.addMethod("changes", assertChanges);
+        Assertion.addMethod("change", assertChanges);
+        Assertion.addMethod("changes", assertChanges);
         function assertIncreases(subject, prop, msg) {
           if (msg)
             flag(this, "message", msg);
           var fn = flag(this, "object"), flagMsg = flag(this, "message"), ssfi = flag(this, "ssfi");
-          new Assertion2(fn, flagMsg, ssfi, true).is.a("function");
+          new Assertion(fn, flagMsg, ssfi, true).is.a("function");
           var initial;
           if (!prop) {
-            new Assertion2(subject, flagMsg, ssfi, true).is.a("function");
+            new Assertion(subject, flagMsg, ssfi, true).is.a("function");
             initial = subject();
           } else {
-            new Assertion2(subject, flagMsg, ssfi, true).to.have.property(prop);
+            new Assertion(subject, flagMsg, ssfi, true).to.have.property(prop);
             initial = subject[prop];
           }
-          new Assertion2(initial, flagMsg, ssfi, true).is.a("number");
+          new Assertion(initial, flagMsg, ssfi, true).is.a("number");
           fn();
           var final = prop === void 0 || prop === null ? subject() : subject[prop];
           var msgObj = prop === void 0 || prop === null ? initial : "." + prop;
@@ -2826,22 +2879,22 @@
           flag(this, "realDelta", final - initial);
           this.assert(final - initial > 0, "expected " + msgObj + " to increase", "expected " + msgObj + " to not increase");
         }
-        Assertion2.addMethod("increase", assertIncreases);
-        Assertion2.addMethod("increases", assertIncreases);
+        Assertion.addMethod("increase", assertIncreases);
+        Assertion.addMethod("increases", assertIncreases);
         function assertDecreases(subject, prop, msg) {
           if (msg)
             flag(this, "message", msg);
           var fn = flag(this, "object"), flagMsg = flag(this, "message"), ssfi = flag(this, "ssfi");
-          new Assertion2(fn, flagMsg, ssfi, true).is.a("function");
+          new Assertion(fn, flagMsg, ssfi, true).is.a("function");
           var initial;
           if (!prop) {
-            new Assertion2(subject, flagMsg, ssfi, true).is.a("function");
+            new Assertion(subject, flagMsg, ssfi, true).is.a("function");
             initial = subject();
           } else {
-            new Assertion2(subject, flagMsg, ssfi, true).to.have.property(prop);
+            new Assertion(subject, flagMsg, ssfi, true).to.have.property(prop);
             initial = subject[prop];
           }
-          new Assertion2(initial, flagMsg, ssfi, true).is.a("number");
+          new Assertion(initial, flagMsg, ssfi, true).is.a("number");
           fn();
           var final = prop === void 0 || prop === null ? subject() : subject[prop];
           var msgObj = prop === void 0 || prop === null ? initial : "." + prop;
@@ -2852,8 +2905,8 @@
           flag(this, "realDelta", initial - final);
           this.assert(final - initial < 0, "expected " + msgObj + " to decrease", "expected " + msgObj + " to not decrease");
         }
-        Assertion2.addMethod("decrease", assertDecreases);
-        Assertion2.addMethod("decreases", assertDecreases);
+        Assertion.addMethod("decrease", assertDecreases);
+        Assertion.addMethod("decreases", assertDecreases);
         function assertDelta(delta, msg) {
           if (msg)
             flag(this, "message", msg);
@@ -2870,23 +2923,23 @@
           }
           this.assert(expression, "expected " + msgObj + " to " + behavior + " by " + delta, "expected " + msgObj + " to not " + behavior + " by " + delta);
         }
-        Assertion2.addMethod("by", assertDelta);
-        Assertion2.addProperty("extensible", function() {
+        Assertion.addMethod("by", assertDelta);
+        Assertion.addProperty("extensible", function() {
           var obj = flag(this, "object");
           var isExtensible = obj === Object(obj) && Object.isExtensible(obj);
           this.assert(isExtensible, "expected #{this} to be extensible", "expected #{this} to not be extensible");
         });
-        Assertion2.addProperty("sealed", function() {
+        Assertion.addProperty("sealed", function() {
           var obj = flag(this, "object");
           var isSealed = obj === Object(obj) ? Object.isSealed(obj) : true;
           this.assert(isSealed, "expected #{this} to be sealed", "expected #{this} to not be sealed");
         });
-        Assertion2.addProperty("frozen", function() {
+        Assertion.addProperty("frozen", function() {
           var obj = flag(this, "object");
           var isFrozen = obj === Object(obj) ? Object.isFrozen(obj) : true;
           this.assert(isFrozen, "expected #{this} to be frozen", "expected #{this} to not be frozen");
         });
-        Assertion2.addProperty("finite", function(msg) {
+        Assertion.addProperty("finite", function(msg) {
           var obj = flag(this, "object");
           this.assert(typeof obj === "number" && isFinite(obj), "expected #{this} to be a finite number", "expected #{this} to not be a finite number");
         });
@@ -2897,21 +2950,21 @@
   // node_modules/chai/lib/chai/interface/expect.js
   var require_expect = __commonJS({
     "node_modules/chai/lib/chai/interface/expect.js"(exports, module) {
-      module.exports = function(chai2, util2) {
-        chai2.expect = function(val, message) {
-          return new chai2.Assertion(val, message);
+      module.exports = function(chai, util) {
+        chai.expect = function(val, message) {
+          return new chai.Assertion(val, message);
         };
-        chai2.expect.fail = function(actual, expected, message, operator) {
+        chai.expect.fail = function(actual, expected, message, operator) {
           if (arguments.length < 2) {
             message = actual;
             actual = void 0;
           }
           message = message || "expect.fail()";
-          throw new chai2.AssertionError(message, {
+          throw new chai.AssertionError(message, {
             actual,
             expected,
             operator
-          }, chai2.expect.fail);
+          }, chai.expect.fail);
         };
       };
     }
@@ -2920,14 +2973,14 @@
   // node_modules/chai/lib/chai/interface/should.js
   var require_should = __commonJS({
     "node_modules/chai/lib/chai/interface/should.js"(exports, module) {
-      module.exports = function(chai2, util2) {
-        var Assertion2 = chai2.Assertion;
+      module.exports = function(chai, util) {
+        var Assertion = chai.Assertion;
         function loadShould() {
           function shouldGetter() {
             if (this instanceof String || this instanceof Number || this instanceof Boolean || typeof Symbol === "function" && this instanceof Symbol || typeof BigInt === "function" && this instanceof BigInt) {
-              return new Assertion2(this.valueOf(), null, shouldGetter);
+              return new Assertion(this.valueOf(), null, shouldGetter);
             }
-            return new Assertion2(this, null, shouldGetter);
+            return new Assertion(this, null, shouldGetter);
           }
           function shouldSetter(value) {
             Object.defineProperty(this, "should", {
@@ -2942,45 +2995,45 @@
             get: shouldGetter,
             configurable: true
           });
-          var should2 = {};
-          should2.fail = function(actual, expected, message, operator) {
+          var should = {};
+          should.fail = function(actual, expected, message, operator) {
             if (arguments.length < 2) {
               message = actual;
               actual = void 0;
             }
             message = message || "should.fail()";
-            throw new chai2.AssertionError(message, {
+            throw new chai.AssertionError(message, {
               actual,
               expected,
               operator
-            }, should2.fail);
+            }, should.fail);
           };
-          should2.equal = function(val1, val2, msg) {
-            new Assertion2(val1, msg).to.equal(val2);
+          should.equal = function(val1, val2, msg) {
+            new Assertion(val1, msg).to.equal(val2);
           };
-          should2.Throw = function(fn, errt, errs, msg) {
-            new Assertion2(fn, msg).to.Throw(errt, errs);
+          should.Throw = function(fn, errt, errs, msg) {
+            new Assertion(fn, msg).to.Throw(errt, errs);
           };
-          should2.exist = function(val, msg) {
-            new Assertion2(val, msg).to.exist;
+          should.exist = function(val, msg) {
+            new Assertion(val, msg).to.exist;
           };
-          should2.not = {};
-          should2.not.equal = function(val1, val2, msg) {
-            new Assertion2(val1, msg).to.not.equal(val2);
+          should.not = {};
+          should.not.equal = function(val1, val2, msg) {
+            new Assertion(val1, msg).to.not.equal(val2);
           };
-          should2.not.Throw = function(fn, errt, errs, msg) {
-            new Assertion2(fn, msg).to.not.Throw(errt, errs);
+          should.not.Throw = function(fn, errt, errs, msg) {
+            new Assertion(fn, msg).to.not.Throw(errt, errs);
           };
-          should2.not.exist = function(val, msg) {
-            new Assertion2(val, msg).to.not.exist;
+          should.not.exist = function(val, msg) {
+            new Assertion(val, msg).to.not.exist;
           };
-          should2["throw"] = should2["Throw"];
-          should2.not["throw"] = should2.not["Throw"];
-          return should2;
+          should["throw"] = should["Throw"];
+          should.not["throw"] = should.not["Throw"];
+          return should;
         }
         ;
-        chai2.should = loadShould;
-        chai2.Should = loadShould;
+        chai.should = loadShould;
+        chai.Should = loadShould;
       };
     }
   });
@@ -2988,294 +3041,294 @@
   // node_modules/chai/lib/chai/interface/assert.js
   var require_assert = __commonJS({
     "node_modules/chai/lib/chai/interface/assert.js"(exports, module) {
-      module.exports = function(chai2, util2) {
-        var Assertion2 = chai2.Assertion, flag = util2.flag;
-        var assert2 = chai2.assert = function(express, errmsg) {
-          var test = new Assertion2(null, null, chai2.assert, true);
+      module.exports = function(chai, util) {
+        var Assertion = chai.Assertion, flag = util.flag;
+        var assert = chai.assert = function(express, errmsg) {
+          var test = new Assertion(null, null, chai.assert, true);
           test.assert(express, errmsg, "[ negation message unavailable ]");
         };
-        assert2.fail = function(actual, expected, message, operator) {
+        assert.fail = function(actual, expected, message, operator) {
           if (arguments.length < 2) {
             message = actual;
             actual = void 0;
           }
           message = message || "assert.fail()";
-          throw new chai2.AssertionError(message, {
+          throw new chai.AssertionError(message, {
             actual,
             expected,
             operator
-          }, assert2.fail);
+          }, assert.fail);
         };
-        assert2.isOk = function(val, msg) {
-          new Assertion2(val, msg, assert2.isOk, true).is.ok;
+        assert.isOk = function(val, msg) {
+          new Assertion(val, msg, assert.isOk, true).is.ok;
         };
-        assert2.isNotOk = function(val, msg) {
-          new Assertion2(val, msg, assert2.isNotOk, true).is.not.ok;
+        assert.isNotOk = function(val, msg) {
+          new Assertion(val, msg, assert.isNotOk, true).is.not.ok;
         };
-        assert2.equal = function(act, exp, msg) {
-          var test = new Assertion2(act, msg, assert2.equal, true);
+        assert.equal = function(act, exp, msg) {
+          var test = new Assertion(act, msg, assert.equal, true);
           test.assert(exp == flag(test, "object"), "expected #{this} to equal #{exp}", "expected #{this} to not equal #{act}", exp, act, true);
         };
-        assert2.notEqual = function(act, exp, msg) {
-          var test = new Assertion2(act, msg, assert2.notEqual, true);
+        assert.notEqual = function(act, exp, msg) {
+          var test = new Assertion(act, msg, assert.notEqual, true);
           test.assert(exp != flag(test, "object"), "expected #{this} to not equal #{exp}", "expected #{this} to equal #{act}", exp, act, true);
         };
-        assert2.strictEqual = function(act, exp, msg) {
-          new Assertion2(act, msg, assert2.strictEqual, true).to.equal(exp);
+        assert.strictEqual = function(act, exp, msg) {
+          new Assertion(act, msg, assert.strictEqual, true).to.equal(exp);
         };
-        assert2.notStrictEqual = function(act, exp, msg) {
-          new Assertion2(act, msg, assert2.notStrictEqual, true).to.not.equal(exp);
+        assert.notStrictEqual = function(act, exp, msg) {
+          new Assertion(act, msg, assert.notStrictEqual, true).to.not.equal(exp);
         };
-        assert2.deepEqual = assert2.deepStrictEqual = function(act, exp, msg) {
-          new Assertion2(act, msg, assert2.deepEqual, true).to.eql(exp);
+        assert.deepEqual = assert.deepStrictEqual = function(act, exp, msg) {
+          new Assertion(act, msg, assert.deepEqual, true).to.eql(exp);
         };
-        assert2.notDeepEqual = function(act, exp, msg) {
-          new Assertion2(act, msg, assert2.notDeepEqual, true).to.not.eql(exp);
+        assert.notDeepEqual = function(act, exp, msg) {
+          new Assertion(act, msg, assert.notDeepEqual, true).to.not.eql(exp);
         };
-        assert2.isAbove = function(val, abv, msg) {
-          new Assertion2(val, msg, assert2.isAbove, true).to.be.above(abv);
+        assert.isAbove = function(val, abv, msg) {
+          new Assertion(val, msg, assert.isAbove, true).to.be.above(abv);
         };
-        assert2.isAtLeast = function(val, atlst, msg) {
-          new Assertion2(val, msg, assert2.isAtLeast, true).to.be.least(atlst);
+        assert.isAtLeast = function(val, atlst, msg) {
+          new Assertion(val, msg, assert.isAtLeast, true).to.be.least(atlst);
         };
-        assert2.isBelow = function(val, blw, msg) {
-          new Assertion2(val, msg, assert2.isBelow, true).to.be.below(blw);
+        assert.isBelow = function(val, blw, msg) {
+          new Assertion(val, msg, assert.isBelow, true).to.be.below(blw);
         };
-        assert2.isAtMost = function(val, atmst, msg) {
-          new Assertion2(val, msg, assert2.isAtMost, true).to.be.most(atmst);
+        assert.isAtMost = function(val, atmst, msg) {
+          new Assertion(val, msg, assert.isAtMost, true).to.be.most(atmst);
         };
-        assert2.isTrue = function(val, msg) {
-          new Assertion2(val, msg, assert2.isTrue, true).is["true"];
+        assert.isTrue = function(val, msg) {
+          new Assertion(val, msg, assert.isTrue, true).is["true"];
         };
-        assert2.isNotTrue = function(val, msg) {
-          new Assertion2(val, msg, assert2.isNotTrue, true).to.not.equal(true);
+        assert.isNotTrue = function(val, msg) {
+          new Assertion(val, msg, assert.isNotTrue, true).to.not.equal(true);
         };
-        assert2.isFalse = function(val, msg) {
-          new Assertion2(val, msg, assert2.isFalse, true).is["false"];
+        assert.isFalse = function(val, msg) {
+          new Assertion(val, msg, assert.isFalse, true).is["false"];
         };
-        assert2.isNotFalse = function(val, msg) {
-          new Assertion2(val, msg, assert2.isNotFalse, true).to.not.equal(false);
+        assert.isNotFalse = function(val, msg) {
+          new Assertion(val, msg, assert.isNotFalse, true).to.not.equal(false);
         };
-        assert2.isNull = function(val, msg) {
-          new Assertion2(val, msg, assert2.isNull, true).to.equal(null);
+        assert.isNull = function(val, msg) {
+          new Assertion(val, msg, assert.isNull, true).to.equal(null);
         };
-        assert2.isNotNull = function(val, msg) {
-          new Assertion2(val, msg, assert2.isNotNull, true).to.not.equal(null);
+        assert.isNotNull = function(val, msg) {
+          new Assertion(val, msg, assert.isNotNull, true).to.not.equal(null);
         };
-        assert2.isNaN = function(val, msg) {
-          new Assertion2(val, msg, assert2.isNaN, true).to.be.NaN;
+        assert.isNaN = function(val, msg) {
+          new Assertion(val, msg, assert.isNaN, true).to.be.NaN;
         };
-        assert2.isNotNaN = function(val, msg) {
-          new Assertion2(val, msg, assert2.isNotNaN, true).not.to.be.NaN;
+        assert.isNotNaN = function(val, msg) {
+          new Assertion(val, msg, assert.isNotNaN, true).not.to.be.NaN;
         };
-        assert2.exists = function(val, msg) {
-          new Assertion2(val, msg, assert2.exists, true).to.exist;
+        assert.exists = function(val, msg) {
+          new Assertion(val, msg, assert.exists, true).to.exist;
         };
-        assert2.notExists = function(val, msg) {
-          new Assertion2(val, msg, assert2.notExists, true).to.not.exist;
+        assert.notExists = function(val, msg) {
+          new Assertion(val, msg, assert.notExists, true).to.not.exist;
         };
-        assert2.isUndefined = function(val, msg) {
-          new Assertion2(val, msg, assert2.isUndefined, true).to.equal(void 0);
+        assert.isUndefined = function(val, msg) {
+          new Assertion(val, msg, assert.isUndefined, true).to.equal(void 0);
         };
-        assert2.isDefined = function(val, msg) {
-          new Assertion2(val, msg, assert2.isDefined, true).to.not.equal(void 0);
+        assert.isDefined = function(val, msg) {
+          new Assertion(val, msg, assert.isDefined, true).to.not.equal(void 0);
         };
-        assert2.isFunction = function(val, msg) {
-          new Assertion2(val, msg, assert2.isFunction, true).to.be.a("function");
+        assert.isFunction = function(val, msg) {
+          new Assertion(val, msg, assert.isFunction, true).to.be.a("function");
         };
-        assert2.isNotFunction = function(val, msg) {
-          new Assertion2(val, msg, assert2.isNotFunction, true).to.not.be.a("function");
+        assert.isNotFunction = function(val, msg) {
+          new Assertion(val, msg, assert.isNotFunction, true).to.not.be.a("function");
         };
-        assert2.isObject = function(val, msg) {
-          new Assertion2(val, msg, assert2.isObject, true).to.be.a("object");
+        assert.isObject = function(val, msg) {
+          new Assertion(val, msg, assert.isObject, true).to.be.a("object");
         };
-        assert2.isNotObject = function(val, msg) {
-          new Assertion2(val, msg, assert2.isNotObject, true).to.not.be.a("object");
+        assert.isNotObject = function(val, msg) {
+          new Assertion(val, msg, assert.isNotObject, true).to.not.be.a("object");
         };
-        assert2.isArray = function(val, msg) {
-          new Assertion2(val, msg, assert2.isArray, true).to.be.an("array");
+        assert.isArray = function(val, msg) {
+          new Assertion(val, msg, assert.isArray, true).to.be.an("array");
         };
-        assert2.isNotArray = function(val, msg) {
-          new Assertion2(val, msg, assert2.isNotArray, true).to.not.be.an("array");
+        assert.isNotArray = function(val, msg) {
+          new Assertion(val, msg, assert.isNotArray, true).to.not.be.an("array");
         };
-        assert2.isString = function(val, msg) {
-          new Assertion2(val, msg, assert2.isString, true).to.be.a("string");
+        assert.isString = function(val, msg) {
+          new Assertion(val, msg, assert.isString, true).to.be.a("string");
         };
-        assert2.isNotString = function(val, msg) {
-          new Assertion2(val, msg, assert2.isNotString, true).to.not.be.a("string");
+        assert.isNotString = function(val, msg) {
+          new Assertion(val, msg, assert.isNotString, true).to.not.be.a("string");
         };
-        assert2.isNumber = function(val, msg) {
-          new Assertion2(val, msg, assert2.isNumber, true).to.be.a("number");
+        assert.isNumber = function(val, msg) {
+          new Assertion(val, msg, assert.isNumber, true).to.be.a("number");
         };
-        assert2.isNotNumber = function(val, msg) {
-          new Assertion2(val, msg, assert2.isNotNumber, true).to.not.be.a("number");
+        assert.isNotNumber = function(val, msg) {
+          new Assertion(val, msg, assert.isNotNumber, true).to.not.be.a("number");
         };
-        assert2.isFinite = function(val, msg) {
-          new Assertion2(val, msg, assert2.isFinite, true).to.be.finite;
+        assert.isFinite = function(val, msg) {
+          new Assertion(val, msg, assert.isFinite, true).to.be.finite;
         };
-        assert2.isBoolean = function(val, msg) {
-          new Assertion2(val, msg, assert2.isBoolean, true).to.be.a("boolean");
+        assert.isBoolean = function(val, msg) {
+          new Assertion(val, msg, assert.isBoolean, true).to.be.a("boolean");
         };
-        assert2.isNotBoolean = function(val, msg) {
-          new Assertion2(val, msg, assert2.isNotBoolean, true).to.not.be.a("boolean");
+        assert.isNotBoolean = function(val, msg) {
+          new Assertion(val, msg, assert.isNotBoolean, true).to.not.be.a("boolean");
         };
-        assert2.typeOf = function(val, type, msg) {
-          new Assertion2(val, msg, assert2.typeOf, true).to.be.a(type);
+        assert.typeOf = function(val, type, msg) {
+          new Assertion(val, msg, assert.typeOf, true).to.be.a(type);
         };
-        assert2.notTypeOf = function(val, type, msg) {
-          new Assertion2(val, msg, assert2.notTypeOf, true).to.not.be.a(type);
+        assert.notTypeOf = function(val, type, msg) {
+          new Assertion(val, msg, assert.notTypeOf, true).to.not.be.a(type);
         };
-        assert2.instanceOf = function(val, type, msg) {
-          new Assertion2(val, msg, assert2.instanceOf, true).to.be.instanceOf(type);
+        assert.instanceOf = function(val, type, msg) {
+          new Assertion(val, msg, assert.instanceOf, true).to.be.instanceOf(type);
         };
-        assert2.notInstanceOf = function(val, type, msg) {
-          new Assertion2(val, msg, assert2.notInstanceOf, true).to.not.be.instanceOf(type);
+        assert.notInstanceOf = function(val, type, msg) {
+          new Assertion(val, msg, assert.notInstanceOf, true).to.not.be.instanceOf(type);
         };
-        assert2.include = function(exp, inc, msg) {
-          new Assertion2(exp, msg, assert2.include, true).include(inc);
+        assert.include = function(exp, inc, msg) {
+          new Assertion(exp, msg, assert.include, true).include(inc);
         };
-        assert2.notInclude = function(exp, inc, msg) {
-          new Assertion2(exp, msg, assert2.notInclude, true).not.include(inc);
+        assert.notInclude = function(exp, inc, msg) {
+          new Assertion(exp, msg, assert.notInclude, true).not.include(inc);
         };
-        assert2.deepInclude = function(exp, inc, msg) {
-          new Assertion2(exp, msg, assert2.deepInclude, true).deep.include(inc);
+        assert.deepInclude = function(exp, inc, msg) {
+          new Assertion(exp, msg, assert.deepInclude, true).deep.include(inc);
         };
-        assert2.notDeepInclude = function(exp, inc, msg) {
-          new Assertion2(exp, msg, assert2.notDeepInclude, true).not.deep.include(inc);
+        assert.notDeepInclude = function(exp, inc, msg) {
+          new Assertion(exp, msg, assert.notDeepInclude, true).not.deep.include(inc);
         };
-        assert2.nestedInclude = function(exp, inc, msg) {
-          new Assertion2(exp, msg, assert2.nestedInclude, true).nested.include(inc);
+        assert.nestedInclude = function(exp, inc, msg) {
+          new Assertion(exp, msg, assert.nestedInclude, true).nested.include(inc);
         };
-        assert2.notNestedInclude = function(exp, inc, msg) {
-          new Assertion2(exp, msg, assert2.notNestedInclude, true).not.nested.include(inc);
+        assert.notNestedInclude = function(exp, inc, msg) {
+          new Assertion(exp, msg, assert.notNestedInclude, true).not.nested.include(inc);
         };
-        assert2.deepNestedInclude = function(exp, inc, msg) {
-          new Assertion2(exp, msg, assert2.deepNestedInclude, true).deep.nested.include(inc);
+        assert.deepNestedInclude = function(exp, inc, msg) {
+          new Assertion(exp, msg, assert.deepNestedInclude, true).deep.nested.include(inc);
         };
-        assert2.notDeepNestedInclude = function(exp, inc, msg) {
-          new Assertion2(exp, msg, assert2.notDeepNestedInclude, true).not.deep.nested.include(inc);
+        assert.notDeepNestedInclude = function(exp, inc, msg) {
+          new Assertion(exp, msg, assert.notDeepNestedInclude, true).not.deep.nested.include(inc);
         };
-        assert2.ownInclude = function(exp, inc, msg) {
-          new Assertion2(exp, msg, assert2.ownInclude, true).own.include(inc);
+        assert.ownInclude = function(exp, inc, msg) {
+          new Assertion(exp, msg, assert.ownInclude, true).own.include(inc);
         };
-        assert2.notOwnInclude = function(exp, inc, msg) {
-          new Assertion2(exp, msg, assert2.notOwnInclude, true).not.own.include(inc);
+        assert.notOwnInclude = function(exp, inc, msg) {
+          new Assertion(exp, msg, assert.notOwnInclude, true).not.own.include(inc);
         };
-        assert2.deepOwnInclude = function(exp, inc, msg) {
-          new Assertion2(exp, msg, assert2.deepOwnInclude, true).deep.own.include(inc);
+        assert.deepOwnInclude = function(exp, inc, msg) {
+          new Assertion(exp, msg, assert.deepOwnInclude, true).deep.own.include(inc);
         };
-        assert2.notDeepOwnInclude = function(exp, inc, msg) {
-          new Assertion2(exp, msg, assert2.notDeepOwnInclude, true).not.deep.own.include(inc);
+        assert.notDeepOwnInclude = function(exp, inc, msg) {
+          new Assertion(exp, msg, assert.notDeepOwnInclude, true).not.deep.own.include(inc);
         };
-        assert2.match = function(exp, re, msg) {
-          new Assertion2(exp, msg, assert2.match, true).to.match(re);
+        assert.match = function(exp, re, msg) {
+          new Assertion(exp, msg, assert.match, true).to.match(re);
         };
-        assert2.notMatch = function(exp, re, msg) {
-          new Assertion2(exp, msg, assert2.notMatch, true).to.not.match(re);
+        assert.notMatch = function(exp, re, msg) {
+          new Assertion(exp, msg, assert.notMatch, true).to.not.match(re);
         };
-        assert2.property = function(obj, prop, msg) {
-          new Assertion2(obj, msg, assert2.property, true).to.have.property(prop);
+        assert.property = function(obj, prop, msg) {
+          new Assertion(obj, msg, assert.property, true).to.have.property(prop);
         };
-        assert2.notProperty = function(obj, prop, msg) {
-          new Assertion2(obj, msg, assert2.notProperty, true).to.not.have.property(prop);
+        assert.notProperty = function(obj, prop, msg) {
+          new Assertion(obj, msg, assert.notProperty, true).to.not.have.property(prop);
         };
-        assert2.propertyVal = function(obj, prop, val, msg) {
-          new Assertion2(obj, msg, assert2.propertyVal, true).to.have.property(prop, val);
+        assert.propertyVal = function(obj, prop, val, msg) {
+          new Assertion(obj, msg, assert.propertyVal, true).to.have.property(prop, val);
         };
-        assert2.notPropertyVal = function(obj, prop, val, msg) {
-          new Assertion2(obj, msg, assert2.notPropertyVal, true).to.not.have.property(prop, val);
+        assert.notPropertyVal = function(obj, prop, val, msg) {
+          new Assertion(obj, msg, assert.notPropertyVal, true).to.not.have.property(prop, val);
         };
-        assert2.deepPropertyVal = function(obj, prop, val, msg) {
-          new Assertion2(obj, msg, assert2.deepPropertyVal, true).to.have.deep.property(prop, val);
+        assert.deepPropertyVal = function(obj, prop, val, msg) {
+          new Assertion(obj, msg, assert.deepPropertyVal, true).to.have.deep.property(prop, val);
         };
-        assert2.notDeepPropertyVal = function(obj, prop, val, msg) {
-          new Assertion2(obj, msg, assert2.notDeepPropertyVal, true).to.not.have.deep.property(prop, val);
+        assert.notDeepPropertyVal = function(obj, prop, val, msg) {
+          new Assertion(obj, msg, assert.notDeepPropertyVal, true).to.not.have.deep.property(prop, val);
         };
-        assert2.ownProperty = function(obj, prop, msg) {
-          new Assertion2(obj, msg, assert2.ownProperty, true).to.have.own.property(prop);
+        assert.ownProperty = function(obj, prop, msg) {
+          new Assertion(obj, msg, assert.ownProperty, true).to.have.own.property(prop);
         };
-        assert2.notOwnProperty = function(obj, prop, msg) {
-          new Assertion2(obj, msg, assert2.notOwnProperty, true).to.not.have.own.property(prop);
+        assert.notOwnProperty = function(obj, prop, msg) {
+          new Assertion(obj, msg, assert.notOwnProperty, true).to.not.have.own.property(prop);
         };
-        assert2.ownPropertyVal = function(obj, prop, value, msg) {
-          new Assertion2(obj, msg, assert2.ownPropertyVal, true).to.have.own.property(prop, value);
+        assert.ownPropertyVal = function(obj, prop, value, msg) {
+          new Assertion(obj, msg, assert.ownPropertyVal, true).to.have.own.property(prop, value);
         };
-        assert2.notOwnPropertyVal = function(obj, prop, value, msg) {
-          new Assertion2(obj, msg, assert2.notOwnPropertyVal, true).to.not.have.own.property(prop, value);
+        assert.notOwnPropertyVal = function(obj, prop, value, msg) {
+          new Assertion(obj, msg, assert.notOwnPropertyVal, true).to.not.have.own.property(prop, value);
         };
-        assert2.deepOwnPropertyVal = function(obj, prop, value, msg) {
-          new Assertion2(obj, msg, assert2.deepOwnPropertyVal, true).to.have.deep.own.property(prop, value);
+        assert.deepOwnPropertyVal = function(obj, prop, value, msg) {
+          new Assertion(obj, msg, assert.deepOwnPropertyVal, true).to.have.deep.own.property(prop, value);
         };
-        assert2.notDeepOwnPropertyVal = function(obj, prop, value, msg) {
-          new Assertion2(obj, msg, assert2.notDeepOwnPropertyVal, true).to.not.have.deep.own.property(prop, value);
+        assert.notDeepOwnPropertyVal = function(obj, prop, value, msg) {
+          new Assertion(obj, msg, assert.notDeepOwnPropertyVal, true).to.not.have.deep.own.property(prop, value);
         };
-        assert2.nestedProperty = function(obj, prop, msg) {
-          new Assertion2(obj, msg, assert2.nestedProperty, true).to.have.nested.property(prop);
+        assert.nestedProperty = function(obj, prop, msg) {
+          new Assertion(obj, msg, assert.nestedProperty, true).to.have.nested.property(prop);
         };
-        assert2.notNestedProperty = function(obj, prop, msg) {
-          new Assertion2(obj, msg, assert2.notNestedProperty, true).to.not.have.nested.property(prop);
+        assert.notNestedProperty = function(obj, prop, msg) {
+          new Assertion(obj, msg, assert.notNestedProperty, true).to.not.have.nested.property(prop);
         };
-        assert2.nestedPropertyVal = function(obj, prop, val, msg) {
-          new Assertion2(obj, msg, assert2.nestedPropertyVal, true).to.have.nested.property(prop, val);
+        assert.nestedPropertyVal = function(obj, prop, val, msg) {
+          new Assertion(obj, msg, assert.nestedPropertyVal, true).to.have.nested.property(prop, val);
         };
-        assert2.notNestedPropertyVal = function(obj, prop, val, msg) {
-          new Assertion2(obj, msg, assert2.notNestedPropertyVal, true).to.not.have.nested.property(prop, val);
+        assert.notNestedPropertyVal = function(obj, prop, val, msg) {
+          new Assertion(obj, msg, assert.notNestedPropertyVal, true).to.not.have.nested.property(prop, val);
         };
-        assert2.deepNestedPropertyVal = function(obj, prop, val, msg) {
-          new Assertion2(obj, msg, assert2.deepNestedPropertyVal, true).to.have.deep.nested.property(prop, val);
+        assert.deepNestedPropertyVal = function(obj, prop, val, msg) {
+          new Assertion(obj, msg, assert.deepNestedPropertyVal, true).to.have.deep.nested.property(prop, val);
         };
-        assert2.notDeepNestedPropertyVal = function(obj, prop, val, msg) {
-          new Assertion2(obj, msg, assert2.notDeepNestedPropertyVal, true).to.not.have.deep.nested.property(prop, val);
+        assert.notDeepNestedPropertyVal = function(obj, prop, val, msg) {
+          new Assertion(obj, msg, assert.notDeepNestedPropertyVal, true).to.not.have.deep.nested.property(prop, val);
         };
-        assert2.lengthOf = function(exp, len, msg) {
-          new Assertion2(exp, msg, assert2.lengthOf, true).to.have.lengthOf(len);
+        assert.lengthOf = function(exp, len, msg) {
+          new Assertion(exp, msg, assert.lengthOf, true).to.have.lengthOf(len);
         };
-        assert2.hasAnyKeys = function(obj, keys, msg) {
-          new Assertion2(obj, msg, assert2.hasAnyKeys, true).to.have.any.keys(keys);
+        assert.hasAnyKeys = function(obj, keys, msg) {
+          new Assertion(obj, msg, assert.hasAnyKeys, true).to.have.any.keys(keys);
         };
-        assert2.hasAllKeys = function(obj, keys, msg) {
-          new Assertion2(obj, msg, assert2.hasAllKeys, true).to.have.all.keys(keys);
+        assert.hasAllKeys = function(obj, keys, msg) {
+          new Assertion(obj, msg, assert.hasAllKeys, true).to.have.all.keys(keys);
         };
-        assert2.containsAllKeys = function(obj, keys, msg) {
-          new Assertion2(obj, msg, assert2.containsAllKeys, true).to.contain.all.keys(keys);
+        assert.containsAllKeys = function(obj, keys, msg) {
+          new Assertion(obj, msg, assert.containsAllKeys, true).to.contain.all.keys(keys);
         };
-        assert2.doesNotHaveAnyKeys = function(obj, keys, msg) {
-          new Assertion2(obj, msg, assert2.doesNotHaveAnyKeys, true).to.not.have.any.keys(keys);
+        assert.doesNotHaveAnyKeys = function(obj, keys, msg) {
+          new Assertion(obj, msg, assert.doesNotHaveAnyKeys, true).to.not.have.any.keys(keys);
         };
-        assert2.doesNotHaveAllKeys = function(obj, keys, msg) {
-          new Assertion2(obj, msg, assert2.doesNotHaveAllKeys, true).to.not.have.all.keys(keys);
+        assert.doesNotHaveAllKeys = function(obj, keys, msg) {
+          new Assertion(obj, msg, assert.doesNotHaveAllKeys, true).to.not.have.all.keys(keys);
         };
-        assert2.hasAnyDeepKeys = function(obj, keys, msg) {
-          new Assertion2(obj, msg, assert2.hasAnyDeepKeys, true).to.have.any.deep.keys(keys);
+        assert.hasAnyDeepKeys = function(obj, keys, msg) {
+          new Assertion(obj, msg, assert.hasAnyDeepKeys, true).to.have.any.deep.keys(keys);
         };
-        assert2.hasAllDeepKeys = function(obj, keys, msg) {
-          new Assertion2(obj, msg, assert2.hasAllDeepKeys, true).to.have.all.deep.keys(keys);
+        assert.hasAllDeepKeys = function(obj, keys, msg) {
+          new Assertion(obj, msg, assert.hasAllDeepKeys, true).to.have.all.deep.keys(keys);
         };
-        assert2.containsAllDeepKeys = function(obj, keys, msg) {
-          new Assertion2(obj, msg, assert2.containsAllDeepKeys, true).to.contain.all.deep.keys(keys);
+        assert.containsAllDeepKeys = function(obj, keys, msg) {
+          new Assertion(obj, msg, assert.containsAllDeepKeys, true).to.contain.all.deep.keys(keys);
         };
-        assert2.doesNotHaveAnyDeepKeys = function(obj, keys, msg) {
-          new Assertion2(obj, msg, assert2.doesNotHaveAnyDeepKeys, true).to.not.have.any.deep.keys(keys);
+        assert.doesNotHaveAnyDeepKeys = function(obj, keys, msg) {
+          new Assertion(obj, msg, assert.doesNotHaveAnyDeepKeys, true).to.not.have.any.deep.keys(keys);
         };
-        assert2.doesNotHaveAllDeepKeys = function(obj, keys, msg) {
-          new Assertion2(obj, msg, assert2.doesNotHaveAllDeepKeys, true).to.not.have.all.deep.keys(keys);
+        assert.doesNotHaveAllDeepKeys = function(obj, keys, msg) {
+          new Assertion(obj, msg, assert.doesNotHaveAllDeepKeys, true).to.not.have.all.deep.keys(keys);
         };
-        assert2.throws = function(fn, errorLike, errMsgMatcher, msg) {
+        assert.throws = function(fn, errorLike, errMsgMatcher, msg) {
           if ("string" === typeof errorLike || errorLike instanceof RegExp) {
             errMsgMatcher = errorLike;
             errorLike = null;
           }
-          var assertErr = new Assertion2(fn, msg, assert2.throws, true).to.throw(errorLike, errMsgMatcher);
+          var assertErr = new Assertion(fn, msg, assert.throws, true).to.throw(errorLike, errMsgMatcher);
           return flag(assertErr, "object");
         };
-        assert2.doesNotThrow = function(fn, errorLike, errMsgMatcher, msg) {
+        assert.doesNotThrow = function(fn, errorLike, errMsgMatcher, msg) {
           if ("string" === typeof errorLike || errorLike instanceof RegExp) {
             errMsgMatcher = errorLike;
             errorLike = null;
           }
-          new Assertion2(fn, msg, assert2.doesNotThrow, true).to.not.throw(errorLike, errMsgMatcher);
+          new Assertion(fn, msg, assert.doesNotThrow, true).to.not.throw(errorLike, errMsgMatcher);
         };
-        assert2.operator = function(val, operator, val2, msg) {
+        assert.operator = function(val, operator, val2, msg) {
           var ok;
           switch (operator) {
             case "==":
@@ -3304,76 +3357,76 @@
               break;
             default:
               msg = msg ? msg + ": " : msg;
-              throw new chai2.AssertionError(msg + 'Invalid operator "' + operator + '"', void 0, assert2.operator);
+              throw new chai.AssertionError(msg + 'Invalid operator "' + operator + '"', void 0, assert.operator);
           }
-          var test = new Assertion2(ok, msg, assert2.operator, true);
-          test.assert(true === flag(test, "object"), "expected " + util2.inspect(val) + " to be " + operator + " " + util2.inspect(val2), "expected " + util2.inspect(val) + " to not be " + operator + " " + util2.inspect(val2));
+          var test = new Assertion(ok, msg, assert.operator, true);
+          test.assert(true === flag(test, "object"), "expected " + util.inspect(val) + " to be " + operator + " " + util.inspect(val2), "expected " + util.inspect(val) + " to not be " + operator + " " + util.inspect(val2));
         };
-        assert2.closeTo = function(act, exp, delta, msg) {
-          new Assertion2(act, msg, assert2.closeTo, true).to.be.closeTo(exp, delta);
+        assert.closeTo = function(act, exp, delta, msg) {
+          new Assertion(act, msg, assert.closeTo, true).to.be.closeTo(exp, delta);
         };
-        assert2.approximately = function(act, exp, delta, msg) {
-          new Assertion2(act, msg, assert2.approximately, true).to.be.approximately(exp, delta);
+        assert.approximately = function(act, exp, delta, msg) {
+          new Assertion(act, msg, assert.approximately, true).to.be.approximately(exp, delta);
         };
-        assert2.sameMembers = function(set1, set2, msg) {
-          new Assertion2(set1, msg, assert2.sameMembers, true).to.have.same.members(set2);
+        assert.sameMembers = function(set1, set2, msg) {
+          new Assertion(set1, msg, assert.sameMembers, true).to.have.same.members(set2);
         };
-        assert2.notSameMembers = function(set1, set2, msg) {
-          new Assertion2(set1, msg, assert2.notSameMembers, true).to.not.have.same.members(set2);
+        assert.notSameMembers = function(set1, set2, msg) {
+          new Assertion(set1, msg, assert.notSameMembers, true).to.not.have.same.members(set2);
         };
-        assert2.sameDeepMembers = function(set1, set2, msg) {
-          new Assertion2(set1, msg, assert2.sameDeepMembers, true).to.have.same.deep.members(set2);
+        assert.sameDeepMembers = function(set1, set2, msg) {
+          new Assertion(set1, msg, assert.sameDeepMembers, true).to.have.same.deep.members(set2);
         };
-        assert2.notSameDeepMembers = function(set1, set2, msg) {
-          new Assertion2(set1, msg, assert2.notSameDeepMembers, true).to.not.have.same.deep.members(set2);
+        assert.notSameDeepMembers = function(set1, set2, msg) {
+          new Assertion(set1, msg, assert.notSameDeepMembers, true).to.not.have.same.deep.members(set2);
         };
-        assert2.sameOrderedMembers = function(set1, set2, msg) {
-          new Assertion2(set1, msg, assert2.sameOrderedMembers, true).to.have.same.ordered.members(set2);
+        assert.sameOrderedMembers = function(set1, set2, msg) {
+          new Assertion(set1, msg, assert.sameOrderedMembers, true).to.have.same.ordered.members(set2);
         };
-        assert2.notSameOrderedMembers = function(set1, set2, msg) {
-          new Assertion2(set1, msg, assert2.notSameOrderedMembers, true).to.not.have.same.ordered.members(set2);
+        assert.notSameOrderedMembers = function(set1, set2, msg) {
+          new Assertion(set1, msg, assert.notSameOrderedMembers, true).to.not.have.same.ordered.members(set2);
         };
-        assert2.sameDeepOrderedMembers = function(set1, set2, msg) {
-          new Assertion2(set1, msg, assert2.sameDeepOrderedMembers, true).to.have.same.deep.ordered.members(set2);
+        assert.sameDeepOrderedMembers = function(set1, set2, msg) {
+          new Assertion(set1, msg, assert.sameDeepOrderedMembers, true).to.have.same.deep.ordered.members(set2);
         };
-        assert2.notSameDeepOrderedMembers = function(set1, set2, msg) {
-          new Assertion2(set1, msg, assert2.notSameDeepOrderedMembers, true).to.not.have.same.deep.ordered.members(set2);
+        assert.notSameDeepOrderedMembers = function(set1, set2, msg) {
+          new Assertion(set1, msg, assert.notSameDeepOrderedMembers, true).to.not.have.same.deep.ordered.members(set2);
         };
-        assert2.includeMembers = function(superset, subset, msg) {
-          new Assertion2(superset, msg, assert2.includeMembers, true).to.include.members(subset);
+        assert.includeMembers = function(superset, subset, msg) {
+          new Assertion(superset, msg, assert.includeMembers, true).to.include.members(subset);
         };
-        assert2.notIncludeMembers = function(superset, subset, msg) {
-          new Assertion2(superset, msg, assert2.notIncludeMembers, true).to.not.include.members(subset);
+        assert.notIncludeMembers = function(superset, subset, msg) {
+          new Assertion(superset, msg, assert.notIncludeMembers, true).to.not.include.members(subset);
         };
-        assert2.includeDeepMembers = function(superset, subset, msg) {
-          new Assertion2(superset, msg, assert2.includeDeepMembers, true).to.include.deep.members(subset);
+        assert.includeDeepMembers = function(superset, subset, msg) {
+          new Assertion(superset, msg, assert.includeDeepMembers, true).to.include.deep.members(subset);
         };
-        assert2.notIncludeDeepMembers = function(superset, subset, msg) {
-          new Assertion2(superset, msg, assert2.notIncludeDeepMembers, true).to.not.include.deep.members(subset);
+        assert.notIncludeDeepMembers = function(superset, subset, msg) {
+          new Assertion(superset, msg, assert.notIncludeDeepMembers, true).to.not.include.deep.members(subset);
         };
-        assert2.includeOrderedMembers = function(superset, subset, msg) {
-          new Assertion2(superset, msg, assert2.includeOrderedMembers, true).to.include.ordered.members(subset);
+        assert.includeOrderedMembers = function(superset, subset, msg) {
+          new Assertion(superset, msg, assert.includeOrderedMembers, true).to.include.ordered.members(subset);
         };
-        assert2.notIncludeOrderedMembers = function(superset, subset, msg) {
-          new Assertion2(superset, msg, assert2.notIncludeOrderedMembers, true).to.not.include.ordered.members(subset);
+        assert.notIncludeOrderedMembers = function(superset, subset, msg) {
+          new Assertion(superset, msg, assert.notIncludeOrderedMembers, true).to.not.include.ordered.members(subset);
         };
-        assert2.includeDeepOrderedMembers = function(superset, subset, msg) {
-          new Assertion2(superset, msg, assert2.includeDeepOrderedMembers, true).to.include.deep.ordered.members(subset);
+        assert.includeDeepOrderedMembers = function(superset, subset, msg) {
+          new Assertion(superset, msg, assert.includeDeepOrderedMembers, true).to.include.deep.ordered.members(subset);
         };
-        assert2.notIncludeDeepOrderedMembers = function(superset, subset, msg) {
-          new Assertion2(superset, msg, assert2.notIncludeDeepOrderedMembers, true).to.not.include.deep.ordered.members(subset);
+        assert.notIncludeDeepOrderedMembers = function(superset, subset, msg) {
+          new Assertion(superset, msg, assert.notIncludeDeepOrderedMembers, true).to.not.include.deep.ordered.members(subset);
         };
-        assert2.oneOf = function(inList, list, msg) {
-          new Assertion2(inList, msg, assert2.oneOf, true).to.be.oneOf(list);
+        assert.oneOf = function(inList, list, msg) {
+          new Assertion(inList, msg, assert.oneOf, true).to.be.oneOf(list);
         };
-        assert2.changes = function(fn, obj, prop, msg) {
+        assert.changes = function(fn, obj, prop, msg) {
           if (arguments.length === 3 && typeof obj === "function") {
             msg = prop;
             prop = null;
           }
-          new Assertion2(fn, msg, assert2.changes, true).to.change(obj, prop);
+          new Assertion(fn, msg, assert.changes, true).to.change(obj, prop);
         };
-        assert2.changesBy = function(fn, obj, prop, delta, msg) {
+        assert.changesBy = function(fn, obj, prop, delta, msg) {
           if (arguments.length === 4 && typeof obj === "function") {
             var tmpMsg = delta;
             delta = prop;
@@ -3382,16 +3435,16 @@
             delta = prop;
             prop = null;
           }
-          new Assertion2(fn, msg, assert2.changesBy, true).to.change(obj, prop).by(delta);
+          new Assertion(fn, msg, assert.changesBy, true).to.change(obj, prop).by(delta);
         };
-        assert2.doesNotChange = function(fn, obj, prop, msg) {
+        assert.doesNotChange = function(fn, obj, prop, msg) {
           if (arguments.length === 3 && typeof obj === "function") {
             msg = prop;
             prop = null;
           }
-          return new Assertion2(fn, msg, assert2.doesNotChange, true).to.not.change(obj, prop);
+          return new Assertion(fn, msg, assert.doesNotChange, true).to.not.change(obj, prop);
         };
-        assert2.changesButNotBy = function(fn, obj, prop, delta, msg) {
+        assert.changesButNotBy = function(fn, obj, prop, delta, msg) {
           if (arguments.length === 4 && typeof obj === "function") {
             var tmpMsg = delta;
             delta = prop;
@@ -3400,16 +3453,16 @@
             delta = prop;
             prop = null;
           }
-          new Assertion2(fn, msg, assert2.changesButNotBy, true).to.change(obj, prop).but.not.by(delta);
+          new Assertion(fn, msg, assert.changesButNotBy, true).to.change(obj, prop).but.not.by(delta);
         };
-        assert2.increases = function(fn, obj, prop, msg) {
+        assert.increases = function(fn, obj, prop, msg) {
           if (arguments.length === 3 && typeof obj === "function") {
             msg = prop;
             prop = null;
           }
-          return new Assertion2(fn, msg, assert2.increases, true).to.increase(obj, prop);
+          return new Assertion(fn, msg, assert.increases, true).to.increase(obj, prop);
         };
-        assert2.increasesBy = function(fn, obj, prop, delta, msg) {
+        assert.increasesBy = function(fn, obj, prop, delta, msg) {
           if (arguments.length === 4 && typeof obj === "function") {
             var tmpMsg = delta;
             delta = prop;
@@ -3418,16 +3471,16 @@
             delta = prop;
             prop = null;
           }
-          new Assertion2(fn, msg, assert2.increasesBy, true).to.increase(obj, prop).by(delta);
+          new Assertion(fn, msg, assert.increasesBy, true).to.increase(obj, prop).by(delta);
         };
-        assert2.doesNotIncrease = function(fn, obj, prop, msg) {
+        assert.doesNotIncrease = function(fn, obj, prop, msg) {
           if (arguments.length === 3 && typeof obj === "function") {
             msg = prop;
             prop = null;
           }
-          return new Assertion2(fn, msg, assert2.doesNotIncrease, true).to.not.increase(obj, prop);
+          return new Assertion(fn, msg, assert.doesNotIncrease, true).to.not.increase(obj, prop);
         };
-        assert2.increasesButNotBy = function(fn, obj, prop, delta, msg) {
+        assert.increasesButNotBy = function(fn, obj, prop, delta, msg) {
           if (arguments.length === 4 && typeof obj === "function") {
             var tmpMsg = delta;
             delta = prop;
@@ -3436,16 +3489,16 @@
             delta = prop;
             prop = null;
           }
-          new Assertion2(fn, msg, assert2.increasesButNotBy, true).to.increase(obj, prop).but.not.by(delta);
+          new Assertion(fn, msg, assert.increasesButNotBy, true).to.increase(obj, prop).but.not.by(delta);
         };
-        assert2.decreases = function(fn, obj, prop, msg) {
+        assert.decreases = function(fn, obj, prop, msg) {
           if (arguments.length === 3 && typeof obj === "function") {
             msg = prop;
             prop = null;
           }
-          return new Assertion2(fn, msg, assert2.decreases, true).to.decrease(obj, prop);
+          return new Assertion(fn, msg, assert.decreases, true).to.decrease(obj, prop);
         };
-        assert2.decreasesBy = function(fn, obj, prop, delta, msg) {
+        assert.decreasesBy = function(fn, obj, prop, delta, msg) {
           if (arguments.length === 4 && typeof obj === "function") {
             var tmpMsg = delta;
             delta = prop;
@@ -3454,16 +3507,16 @@
             delta = prop;
             prop = null;
           }
-          new Assertion2(fn, msg, assert2.decreasesBy, true).to.decrease(obj, prop).by(delta);
+          new Assertion(fn, msg, assert.decreasesBy, true).to.decrease(obj, prop).by(delta);
         };
-        assert2.doesNotDecrease = function(fn, obj, prop, msg) {
+        assert.doesNotDecrease = function(fn, obj, prop, msg) {
           if (arguments.length === 3 && typeof obj === "function") {
             msg = prop;
             prop = null;
           }
-          return new Assertion2(fn, msg, assert2.doesNotDecrease, true).to.not.decrease(obj, prop);
+          return new Assertion(fn, msg, assert.doesNotDecrease, true).to.not.decrease(obj, prop);
         };
-        assert2.doesNotDecreaseBy = function(fn, obj, prop, delta, msg) {
+        assert.doesNotDecreaseBy = function(fn, obj, prop, delta, msg) {
           if (arguments.length === 4 && typeof obj === "function") {
             var tmpMsg = delta;
             delta = prop;
@@ -3472,9 +3525,9 @@
             delta = prop;
             prop = null;
           }
-          return new Assertion2(fn, msg, assert2.doesNotDecreaseBy, true).to.not.decrease(obj, prop).by(delta);
+          return new Assertion(fn, msg, assert.doesNotDecreaseBy, true).to.not.decrease(obj, prop).by(delta);
         };
-        assert2.decreasesButNotBy = function(fn, obj, prop, delta, msg) {
+        assert.decreasesButNotBy = function(fn, obj, prop, delta, msg) {
           if (arguments.length === 4 && typeof obj === "function") {
             var tmpMsg = delta;
             delta = prop;
@@ -3483,39 +3536,39 @@
             delta = prop;
             prop = null;
           }
-          new Assertion2(fn, msg, assert2.decreasesButNotBy, true).to.decrease(obj, prop).but.not.by(delta);
+          new Assertion(fn, msg, assert.decreasesButNotBy, true).to.decrease(obj, prop).but.not.by(delta);
         };
-        assert2.ifError = function(val) {
+        assert.ifError = function(val) {
           if (val) {
             throw val;
           }
         };
-        assert2.isExtensible = function(obj, msg) {
-          new Assertion2(obj, msg, assert2.isExtensible, true).to.be.extensible;
+        assert.isExtensible = function(obj, msg) {
+          new Assertion(obj, msg, assert.isExtensible, true).to.be.extensible;
         };
-        assert2.isNotExtensible = function(obj, msg) {
-          new Assertion2(obj, msg, assert2.isNotExtensible, true).to.not.be.extensible;
+        assert.isNotExtensible = function(obj, msg) {
+          new Assertion(obj, msg, assert.isNotExtensible, true).to.not.be.extensible;
         };
-        assert2.isSealed = function(obj, msg) {
-          new Assertion2(obj, msg, assert2.isSealed, true).to.be.sealed;
+        assert.isSealed = function(obj, msg) {
+          new Assertion(obj, msg, assert.isSealed, true).to.be.sealed;
         };
-        assert2.isNotSealed = function(obj, msg) {
-          new Assertion2(obj, msg, assert2.isNotSealed, true).to.not.be.sealed;
+        assert.isNotSealed = function(obj, msg) {
+          new Assertion(obj, msg, assert.isNotSealed, true).to.not.be.sealed;
         };
-        assert2.isFrozen = function(obj, msg) {
-          new Assertion2(obj, msg, assert2.isFrozen, true).to.be.frozen;
+        assert.isFrozen = function(obj, msg) {
+          new Assertion(obj, msg, assert.isFrozen, true).to.be.frozen;
         };
-        assert2.isNotFrozen = function(obj, msg) {
-          new Assertion2(obj, msg, assert2.isNotFrozen, true).to.not.be.frozen;
+        assert.isNotFrozen = function(obj, msg) {
+          new Assertion(obj, msg, assert.isNotFrozen, true).to.not.be.frozen;
         };
-        assert2.isEmpty = function(val, msg) {
-          new Assertion2(val, msg, assert2.isEmpty, true).to.be.empty;
+        assert.isEmpty = function(val, msg) {
+          new Assertion(val, msg, assert.isEmpty, true).to.be.empty;
         };
-        assert2.isNotEmpty = function(val, msg) {
-          new Assertion2(val, msg, assert2.isNotEmpty, true).to.not.be.empty;
+        assert.isNotEmpty = function(val, msg) {
+          new Assertion(val, msg, assert.isNotEmpty, true).to.not.be.empty;
         };
         (function alias(name, as) {
-          assert2[as] = assert2[name];
+          assert[as] = assert[name];
           return alias;
         })("isOk", "ok")("isNotOk", "notOk")("throws", "throw")("throws", "Throw")("isExtensible", "extensible")("isNotExtensible", "notExtensible")("isSealed", "sealed")("isNotSealed", "notSealed")("isFrozen", "frozen")("isNotFrozen", "notFrozen")("isEmpty", "empty")("isNotEmpty", "notEmpty");
       };
@@ -3528,27 +3581,27 @@
       var used = [];
       exports.version = "4.3.3";
       exports.AssertionError = require_assertion_error();
-      var util2 = require_utils();
+      var util = require_utils();
       exports.use = function(fn) {
         if (!~used.indexOf(fn)) {
-          fn(exports, util2);
+          fn(exports, util);
           used.push(fn);
         }
         return exports;
       };
-      exports.util = util2;
-      var config2 = require_config();
-      exports.config = config2;
+      exports.util = util;
+      var config = require_config();
+      exports.config = config;
       var assertion = require_assertion();
       exports.use(assertion);
-      var core2 = require_assertions();
-      exports.use(core2);
-      var expect2 = require_expect();
-      exports.use(expect2);
-      var should2 = require_should();
-      exports.use(should2);
-      var assert2 = require_assert();
-      exports.use(assert2);
+      var core = require_assertions();
+      exports.use(core);
+      var expect = require_expect();
+      exports.use(expect);
+      var should = require_should();
+      exports.use(should);
+      var assert = require_assert();
+      exports.use(assert);
     }
   });
 
@@ -3559,89 +3612,24 @@
     }
   });
 
-  // dist/esm/index.mjs
-  var DIRNAME_POSIX_REGEX = /^((?:\.(?![^\/]))|(?:(?:\/?|)(?:[\s\S]*?)))(?:\/+?|)(?:(?:\.{1,2}|[^\/]+?|)(?:\.[^.\/]*|))(?:[\/]*)$/;
-  var DIRNAME_WIN32_REGEX = /^((?:\.(?![^\\]))|(?:(?:\\?|)(?:[\s\S]*?)))(?:\\+?|)(?:(?:\.{1,2}|[^\\]+?|)(?:\.[^.\\]*|))(?:[\\]*)$/;
-  var EXTRACT_PATH_REGEX = new RegExp("@?(?<path>[file:\\/\\/]?[^\\(\\s]+):[0-9]+:[0-9]+");
-  var WIN_POSIX_DRIVE_REGEX = /^\/[A-Z]:\/*/;
-  var pathDirname = (path) => {
-    var _a, _b;
-    let dirname2 = (_a = DIRNAME_POSIX_REGEX.exec(path)) == null ? void 0 : _a[1];
-    if (!dirname2) {
-      dirname2 = (_b = DIRNAME_WIN32_REGEX.exec(path)) == null ? void 0 : _b[1];
+  // test/browser/src/base.test.cjs
+  var require_base_test = __commonJS({
+    "test/browser/src/base.test.cjs"() {
+      var { dirname, filename } = require_cjs();
+      var { expect } = require_chai2();
+      describe("Browser CJS", () => {
+        it("dirname() should be a string", function() {
+          console.debug("	dirname() 	->", dirname());
+          expect(dirname()).to.be.a("string");
+        });
+        it("filename() should be a string", function() {
+          console.debug("	filename() 	->", filename());
+          expect(filename()).to.be.a("string");
+        });
+      });
     }
-    if (!dirname2) {
-      throw new Error(`Can't extract dirname from ${path}`);
-    }
-    return dirname2;
-  };
-  var getPathFromErrorStack = () => {
-    var _a, _b;
-    let path;
-    const stack = new Error().stack;
-    if (!stack) {
-      throw new Error("Error has no stack!");
-    }
-    let initiator = stack.split("\n").slice(4, 5)[0];
-    if (!initiator) {
-      initiator = stack.split("\n").slice(3, 4)[0];
-    }
-    if (initiator) {
-      path = (_b = (_a = EXTRACT_PATH_REGEX.exec(initiator)) == null ? void 0 : _a.groups) == null ? void 0 : _b.path;
-    }
-    if (!initiator || !path) {
-      throw new Error("Can't get __dirname!");
-    }
-    return path;
-  };
-  var getPath = () => {
-    let path = getPathFromErrorStack();
-    if (!path) {
-      throw new Error("Can't get path!");
-    }
-    const protocol = "file://";
-    if (path.indexOf(protocol) >= 0) {
-      path = path.slice(protocol.length);
-    }
-    if (WIN_POSIX_DRIVE_REGEX.test(path)) {
-      path = path.slice(1).replace(/\//g, "\\");
-    }
-    return path;
-  };
-  var dirname = () => {
-    let path = getPath();
-    const dirname2 = pathDirname(path);
-    return dirname2;
-  };
-  var filename = () => {
-    let path = getPath();
-    return path;
-  };
-
-  // node_modules/chai/index.mjs
-  var import_index = __toESM(require_chai2(), 1);
-  var expect = import_index.default.expect;
-  var version = import_index.default.version;
-  var Assertion = import_index.default.Assertion;
-  var AssertionError = import_index.default.AssertionError;
-  var util = import_index.default.util;
-  var config = import_index.default.config;
-  var use = import_index.default.use;
-  var should = import_index.default.should;
-  var assert = import_index.default.assert;
-  var core = import_index.default.core;
-
-  // test/browser/src/base.test.mjs
-  describe("Browser ESM", () => {
-    it("dirname() should be a string", function() {
-      console.debug("	dirname() 	->", dirname());
-      expect(dirname()).to.be.a("string");
-    });
-    it("filename() should be a string", function() {
-      console.debug("	filename() 	->", filename());
-      expect(filename()).to.be.a("string");
-    });
   });
+  require_base_test();
 })();
 /*!
  * ### ._obj

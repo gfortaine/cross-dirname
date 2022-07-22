@@ -51,11 +51,13 @@ export const getPath = () => {
     throw new Error("Can't get path!");
   }
 
+  // Remove protocol
   const protocol = "file://";
   if (path.indexOf(protocol) >= 0) {
     path = path.slice(protocol.length);
   }
 
+  // Transform to win32 path
   if (WIN_POSIX_DRIVE_REGEX.test(path)) {
     path = path.slice(1).replace(/\//g, '\\');
   }

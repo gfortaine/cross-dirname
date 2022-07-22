@@ -25,8 +25,8 @@
     "test:gjs": "node test/browser/esbuild.mjs && gjs -m ./test/gjs/base.test.mjs",
     "test:deno": "deno test ./test/deno/base.test.mjs",
     "test:browser": "npm run test:browser:esm && npm run test:browser:cjs",
-    "test:browser:esm": "node test/browser/esbuild.mjs && mocha-headless-chrome -t 120000 -f ./test/browser/index.html",
-    "test:browser:cjs": "node test/browser/esbuild.cjs && mocha-headless-chrome -t 120000 -f ./test/browser/index.html"
+    "test:browser:esm": "node test/browser/esbuild.mjs && mocha-headless-chrome --timeout 120000 --polling 1000 -f ./test/browser/index.html",
+    "test:browser:cjs": "node test/browser/esbuild.cjs && mocha-headless-chrome --timeout 120000 --polling 1000 -f ./test/browser/index.html"
   },
   "keywords": [
     "dirname",
