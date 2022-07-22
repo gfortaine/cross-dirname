@@ -1,4 +1,4 @@
 #! /usr/bin/env gjs -m
-import { dirname, filename } from 'cross-dirname'
-console.log(dirname())
-console.log(filename())
+import { getDirname, getFilename } from 'cross-dirname'
+console.log(getDirname())
+console.log(getFilename())

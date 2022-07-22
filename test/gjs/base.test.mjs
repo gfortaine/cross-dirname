@@ -1,5 +1,5 @@
 import GLib from 'gi://GLib';
-import { dirname, filename } from '../../dist/esm/index.mjs';
+import { getDirname, getFilename } from '../../dist/esm/index.mjs';
 import { exit } from 'system';
 const byteArray = imports.byteArray;
 
@@ -7,8 +7,8 @@ const RED = "\x1b[31m";
 const GREEN = "\x1b[32m";
 const RESET = "\x1b[0m";
 
-const crossDirname = dirname();
-const crossFilename = filename();
+const crossDirname = getDirname();
+const crossFilename = getFilename();
 
 const getOriginalDirname = () => {
     const rootDir = crossDirname;
@@ -33,11 +33,11 @@ let failed = 0;
     const __dirname = getOriginalDirname();
 
     print("GJS");
-    print(`\tdirname() \t-> "${crossDirname}"`);
+    print(`\tgetDirname() \t-> "${crossDirname}"`);
     print(`\t__dirname \t-> "${__dirname}"`);
 
     if (crossDirname === __dirname) {
-        print(`${GREEN}✔${RESET} dirname() should return the same string as __dirname\n`)
+        print(`${GREEN}✔${RESET} getDirname() should return the same string as __dirname\n`)
         passing++;
     } else {
         print(`${RED}failed${RESET}\n`);
@@ -49,11 +49,11 @@ let failed = 0;
 {
     const __filename = getOriginalFilename();
 
-    print(`\tfilename() \t-> "${crossFilename}"`);
+    print(`\tgetFilename() \t-> "${crossFilename}"`);
     print(`\t__filename \t-> "${__filename}"`);
 
     if (crossFilename === __filename) {
-        print(`${GREEN}✔${RESET} filename() should return the same string as __filename\n`)
+        print(`${GREEN}✔${RESET} getFilename() should return the same string as __filename\n`)
         passing++;
     } else {
         print(`${RED}failed${RESET}\n`);

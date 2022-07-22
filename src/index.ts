@@ -18,45 +18,36 @@ const pathDirname = (path: string) => {
 }
 
 const getPathFromErrorStack = () => {
-  let path: string | undefined;
+  let path = '';
   const stack = new Error().stack;
 
   if(!stack) {
-    throw new Error("Error has no stack!");
+    console.warn("Error has no stack!");
+    return path;
   }
 
   // Node.js
-  let initiator: string | undefined = stack.split('\n').slice(4, 5)[0]
+  let initiator: string | undefined = stack.split('\n').slice(4, 5)[0];
 
   // Other
   if(!initiator) {
-    initiator = stack.split('\n').slice(3, 4)[0]
+    initiator = stack.split('\n').slice(3, 4)[0];
   }
 
   if (initiator) {
-    path = EXTRACT_PATH_REGEX.exec(initiator)?.groups?.path
+    path = EXTRACT_PATH_REGEX.exec(initiator)?.groups?.path || '';
   }
 
   if(!initiator || !path) {
-    throw new Error("Can't get __dirname!");
+    console.warn("Can't get path from error stack!");
   }
 
   return path;
 }
 
-/**
- * Cross platform implementation for `__filename`.
- * 
- * @note Please do not use this method in nested other methods,
- * instead always use it in the root of your file, otherwise it may return wrong results. 
- * @returns What `__filename` would return in CJS
- */
-export const filename = () => {
-  let path = getPathFromErrorStack();
 
-  if(!path) {
-    throw new Error("Can't get path!");
-  }
+const getPath = () => {
+  let path = getPathFromErrorStack();
 
   // Remove protocol
   const protocol = "file://";
@@ -79,8 +70,20 @@ export const filename = () => {
  * instead always use it in the root of your file, otherwise it may return wrong results. 
  * @returns What `__dirname` would return in CJS
  */
-export const dirname = () => {
-  let path = filename();
+export const getDirname = () => {
+  let path = getPath();
   const dirname = pathDirname(path)
   return dirname
+}
+
+/**
+ * Cross platform implementation for `__filename`.
+ * 
+ * @note Please do not use this method in nested other methods,
+ * instead always use it in the root of your file, otherwise it may return wrong results. 
+ * @returns What `__filename` would return in CJS
+ */
+export const getFilename = () => {
+  let filename = getPath();
+  return filename
 }

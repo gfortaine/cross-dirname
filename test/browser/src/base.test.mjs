@@ -1,15 +1,19 @@
-import { dirname, filename } from '../../../dist/esm/index.mjs';
+import { getDirname, getFilename } from '../../../dist/esm/index.mjs';
 import { expect } from 'chai';
 
 describe('Browser ESM', () => {
-    it('dirname() should be a string', function () {
-        console.debug("\tdirname() \t->", dirname());
-        expect(dirname()).to.be.a("string");
+    it('getDirname() should be a string', function () {
+        console.debug("\tgetDirname() \t->", getDirname());
+        expect(getDirname()).to.be.a("string");
     });
 
-    it('filename() should be a string', function () {
-        console.debug("\tfilename() \t->", filename());
-        expect(filename()).to.be.a("string");
+    it('getFilename() should be a string', function () {
+        console.debug("\tgetFilename() \t->", getFilename());
+        expect(getFilename()).to.be.a("string");
+    });
+
+    it('getFilename() should end with "base.test.js"', function () {
+        expect(getFilename().endsWith('base.test.js')).to.be.true;
     });
 
 });

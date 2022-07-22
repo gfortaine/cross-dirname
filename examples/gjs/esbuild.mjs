@@ -1,7 +1,7 @@
 #! /usr/bin/env node
 import { build } from "esbuild";
-import dirname from "cross-dirname";
-const __dirname = dirname();
+import { getDirname } from "cross-dirname";
+const __dirname = getDirname();
 
 await build({
     entryPoints: [__dirname + '/src/index.js'],

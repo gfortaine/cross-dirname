@@ -13,39 +13,41 @@ npm install cross-dirname --save
 On Deno you just need to import this package:
 
 ```ts
-import { dirname, filename } from 'https://deno.land/x/cross_dirname/mod.ts';
+import { getDirname, getFilename } from 'https://deno.land/x/cross_dirname/mod.ts';
 ```
 
 ## Usage
+
+Please do not use `getDirname` and `getFilename` in nested other methods, instead always use them in the root of your file, otherwise it may return wrong results.
 
 ### Node.js ESM
 
 ```js
 // /path/to/the/script.mjs
-import { dirname, filename } from 'cross-dirname'
+import { getDirname, getFilename } from 'cross-dirname'
 
-console.log(dirname()) // outputs "/path/to/the"
-console.log(filename()) // outputs "/path/to/the/script.mjs"
+console.log(getDirname()) // outputs "/path/to/the"
+console.log(getFilename()) // outputs "/path/to/the/script.mjs"
 ```
 
 ### Node.js CJS
 
 ```js
 // /path/to/the/script.cjs
-const { dirname, filename } = require('cross-dirname');
+const { getDirname, getFilename } = require('cross-dirname');
 
-console.log(dirname() === __dirname) // true
-console.log(filename() === __filename) // true
+console.log(getDirname() === __dirname) // true
+console.log(getFilename() === __filename) // true
 ```
 
 ### Deno
 
 ```ts
 // /path/to/the/script.ts
-import { dirname, filename } from 'https://deno.land/x/cross_dirname@v0.0.4/mod.ts';
+import { getDirname, getFilename } from 'https://deno.land/x/cross_dirname@v0.0.4/mod.ts';
 
-console.log(dirname()); // outputs "/path/to/the"
-console.log(filename()); // outputs "/path/to/the/script.ts"
+console.log(getDirname()); // outputs "/path/to/the"
+console.log(getFilename()); // outputs "/path/to/the/script.ts"
 ```
 
 ### GJS
@@ -113,9 +115,6 @@ This module has been tested on the following platforms:
 | Gjs     | ESM    | Linux    | ✔        |
 | Gjs     | ESM    | MacOS    | UNTESTED |
 | Gjs     | ESM    | Windows  | UNTESTED |
-| Gjs     | NO-ESM | Linux    | TODO     |
-| Gjs     | NO-ESM | MacOS    | TODO     |
-| Gjs     | NO-ESM | Windows  | TODO     |
 | Chrome  | ESM    | Browser  | ✔        |
 | Chrome  | CJS    | Browser  | ✔        |
 

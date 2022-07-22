@@ -1,12 +1,9 @@
 #! /usr/bin/env node
 const { build } = require("esbuild");
-const { dirname } = require("cross-dirname");
-
-const _dirname = dirname();
 
 build({
-    entryPoints: [_dirname + '/src/base.test.cjs'],
-    outdir: _dirname,
+    entryPoints: [__dirname + '/src/base.test.cjs'],
+    outdir: __dirname,
     bundle: true,
     format: 'iife',
 })

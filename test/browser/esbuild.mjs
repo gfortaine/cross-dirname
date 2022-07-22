@@ -1,11 +1,11 @@
 #! /usr/bin/env node
 import { build } from "esbuild";
-import { dirname } from "cross-dirname";
-const __dirname = dirname();
+import { getDirname } from "cross-dirname";
+const crossDirname = getDirname();
 
 await build({
-    entryPoints: [__dirname + '/src/base.test.mjs'],
-    outdir: __dirname,
+    entryPoints: [crossDirname + '/src/base.test.mjs'],
+    outdir: crossDirname,
     bundle: true,
     target: ['chrome58', 'firefox57', 'safari11', 'edge16'],
     format: 'iife',
