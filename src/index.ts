@@ -1,11 +1,9 @@
 const DIRNAME_POSIX_REGEX = /^((?:\.(?![^\/]))|(?:(?:\/?|)(?:[\s\S]*?)))(?:\/+?|)(?:(?:\.{1,2}|[^\/]+?|)(?:\.[^.\/]*|))(?:[\/]*)$/;
 const DIRNAME_WIN32_REGEX = /^((?:\.(?![^\\]))|(?:(?:\\?|)(?:[\s\S]*?)))(?:\\+?|)(?:(?:\.{1,2}|[^\\]+?|)(?:\.[^.\\]*|))(?:[\\]*)$/;
-const NODE_EXTRACT_PATH_REGEX = /(?<path>[^\(\s]+):[0-9]+:[0-9]+/;
-const GJS_EXTRACT_PATH_REGEX = /@(?<path>file:\/\/[^\(\s]+):[0-9]+:[0-9]+/;
+const EXTRACT_PATH_REGEX = /@?(?<path>[file:\/\/]?[^\(\s]+):[0-9]+:[0-9]+/;
 const WIN_POSIX_DRIVE_REGEX = /^\/[A-Z]:\/*/;
 
 const pathDirname = (path: string) => {
-  
   let dirname = DIRNAME_POSIX_REGEX.exec(path)?.[1];
 
   if (!dirname) {
@@ -20,9 +18,7 @@ const pathDirname = (path: string) => {
 }
 
 const getPathFromErrorStack = () => {
-
   let path: string | undefined;
-
   const stack = new Error().stack;
 
   if(!stack) {
@@ -30,51 +26,29 @@ const getPathFromErrorStack = () => {
   }
 
   // Node.js
-  let initiator: string | undefined = stack.split('\n').slice(3, 4)[0]
+  let initiator: string | undefined = stack.split('\n').slice(4, 5)[0]
 
-  // GJS
+  // Other
   if(!initiator) {
-    initiator = stack.split('\n').slice(2, 3)[0]
+    initiator = stack.split('\n').slice(3, 4)[0]
   }
 
   if (initiator) {
-
-    // GJS
-    path = GJS_EXTRACT_PATH_REGEX.exec(initiator)?.groups?.path
-
-    // Node.js
-    if(!path) {
-      path = NODE_EXTRACT_PATH_REGEX.exec(initiator)?.groups?.path
-    }
+    path = EXTRACT_PATH_REGEX.exec(initiator)?.groups?.path
   }
 
-  if(!initiator) {
-    throw new Error("Can't get __dirname!");
-  }
-
-  if(!path) {
+  if(!initiator || !path) {
     throw new Error("Can't get __dirname!");
   }
 
   return path;
 }
 
-/**
- * CJS and ESM compatible implementation for __dirname.
- * 
- * Works on
- * * Node.js + Windows / Linux / MacOS + ESM / CJS
- * 
- * Contributions for other environments like GJS or Deno are welcome
- * 
- * @returns What `__dirname` would return in CJS
- */
-export const dirname = () => {
-
+export const getPath = () => {
   let path = getPathFromErrorStack();
 
   if(!path) {
-    throw new Error("Can't get __dirname!");
+    throw new Error("Can't get path!");
   }
 
   const protocol = "file://";
@@ -86,13 +60,24 @@ export const dirname = () => {
     path = path.slice(1).replace(/\//g, '\\');
   }
 
-  const dirname = pathDirname(path)
+  return path;
+}
 
+/**
+ * Cross platform implementation for `__dirname`.
+ * @returns What `__dirname` would return in CJS
+ */
+export const dirname = () => {
+  let path = getPath();
+  const dirname = pathDirname(path)
   return dirname
 }
 
-export default dirname;
-
-// Default export for CJS
-// @ts-ignore
-export = dirname;
+/**
+ * Cross platform implementation for `__filename`.
+ * @returns What `__filename` would return in CJS
+ */
+export const filename = () => {
+  let path = getPath();
+  return path
+}

@@ -1,3 +1,4 @@
 #! /usr/bin/env -S node
-const dirname = require('cross-dirname');
+const { dirname, filename } = require('cross-dirname');
 console.log(dirname())
+console.log(filename())

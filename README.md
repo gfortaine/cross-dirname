@@ -1,6 +1,6 @@
 # cross-dirname
 
-[Node.js](https://nodejs.org) + [Gjs](https://gjs.guide/) + [Deno](https://deno.land/) module that returns the current script dirname. Similar to `__dirname` but also works in CommonJs and ES modules.  
+[Node.js](https://nodejs.org) + [Gjs](https://gjs.guide/) + [Deno](https://deno.land/) module that returns the current script dirname and filename. Similar to `__dirname` and `__filename` but also works in CommonJs and ES modules.  
 
 ## Installation
 
@@ -13,7 +13,7 @@ npm install cross-dirname --save
 On Deno you just need to import this package:
 
 ```ts
-import dirname from 'https://deno.land/x/cross_dirname/mod.ts';
+import { dirname, filename } from 'https://deno.land/x/cross_dirname/mod.ts';
 ```
 
 ## Usage
@@ -22,24 +22,30 @@ import dirname from 'https://deno.land/x/cross_dirname/mod.ts';
 
 ```js
 // /path/to/the/script.mjs
-import dirname from 'cross-dirname'
+import { dirname, filename } from 'cross-dirname'
 
 console.log(dirname()) // outputs "/path/to/the"
+console.log(filename()) // outputs "/path/to/the/script.mjs"
 ```
 
 ### Node.js CJS
 
 ```js
 // /path/to/the/script.cjs
-console.log(require('cross-dirname')() === __dirname) // true
+const { dirname, filename } = require('cross-dirname');
+
+console.log(dirname() === __dirname) // true
+console.log(filename() === __filename) // true
 ```
 
 ### Deno
 
 ```ts
 // /path/to/the/script.ts
-import dirname from 'https://deno.land/x/cross_dirname@v0.0.4/mod.ts';
+import { dirname, filename } from 'https://deno.land/x/cross_dirname@v0.0.4/mod.ts';
+
 console.log(dirname()); // outputs "/path/to/the"
+console.log(filename()); // outputs "/path/to/the/script.ts"
 ```
 
 ### GJS

@@ -22,8 +22,8 @@
     "build:types": "tsc --project tsconfig.types.json",
     "test": "npm run test:node && npm run test:deno && npm run test:gjs && npm run test:browser",
     "test:node": "mocha test/node",
-    "test:gjs": "node test/browser/esbuild.mjs && gjs -m ./test/gjs/dirname.test.mjs",
-    "test:deno": "deno test ./test/deno/dirname.test.mjs",
+    "test:gjs": "node test/browser/esbuild.mjs && gjs -m ./test/gjs/base.test.mjs",
+    "test:deno": "deno test ./test/deno/base.test.mjs",
     "test:browser": "npm run test:browser:esm && npm run test:browser:cjs",
     "test:browser:esm": "node test/browser/esbuild.mjs && mocha-headless-chrome -t 120000 -f ./test/browser/index.html",
     "test:browser:cjs": "node test/browser/esbuild.cjs && mocha-headless-chrome -t 120000 -f ./test/browser/index.html"

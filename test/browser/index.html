@@ -9,13 +9,13 @@
   <body>
     <div id="mocha"></div>
 
-    <script src="https://unpkg.com/chai/chai.js"></script>
-    <script src="https://unpkg.com/mocha/mocha.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chai/4.3.6/chai.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mocha/10.0.0/mocha.min.js"></script>
 
     <script class="mocha-init">
       mocha.setup('bdd');
     </script>
-    <script src="dirname.test.js"></script>
+    <script src="base.test.js"></script>
     <script class="mocha-exec">
       mocha.run();
     </script>
