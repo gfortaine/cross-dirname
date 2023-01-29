@@ -19,6 +19,7 @@
     "build": "npm run clear && npm run build:cjs && npm run build:esm && npm run build:types",
     "build:cjs": "tsc && mv ./dist/cjs/index.js ./dist/cjs/index.cjs",
     "build:esm": "tsc --project tsconfig.esm.json && mv ./dist/esm/index.js ./dist/esm/index.mjs",
+    "build:bug": "tsc --project tsconfig.esm.json",
     "build:types": "tsc --project tsconfig.types.json",
     "test": "npm run test:node && npm run test:deno && npm run test:gjs && npm run test:browser",
     "test:node": "mocha test/node",
@@ -45,7 +46,7 @@
   },
   "devDependencies": {
     "chai": "^4.3.6",
-    "cross-dirname": "^0.0.6",
+    "cross-dirname": "^0.1.0",
     "esbuild": "^0.14.49",
     "esm": "^3.2.25",
     "mocha": "^10.0.0",
